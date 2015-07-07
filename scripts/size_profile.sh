@@ -117,7 +117,7 @@ IFS="
 "
 ### Run the avr-size utility to get a listing of all component sizes (code/data)
 ### data is all 0, which is likely due to the fact that this is a library
-MARK3_DATA=$(${SIZE_BIN} ./stage/lib/${ARCH}/${VARIANT}/${TOOLCHAIN}/libmark3.a)
+MARK3_DATA=$(${SIZE_BIN} ./stage/lib/${ARCH}/${VARIANT}/${TOOLCHAIN}/libmark3c.a)
 
 
 ### Parse through the reported data, line at a time, and convert the data from the
@@ -165,121 +165,126 @@ for LINE in ${MARK3_DATA}; do
 
     MODNAME=""
     case ${MODULE} in
-        "atomic.cpp.o")
+		"atomic.c.o")
             #Ruler:  ----5---10----5---20----5---30----5---40----5---50----5---60"
             MODNAME="Atomic Operations..............................."
             ;;
-        "blocking.cpp.o")
+		"blocking.c.o")
             #Ruler:  ----5---10----5---20----5---30----5---40----5---50----5---60"
             MODNAME="Synchronization Objects - Base Class............"
             KERNEL_SIZE=$(( KERNEL_SIZE+${DEC} ))
             ;;
-        "driver.cpp.o")
+		"driver.c.o")
             #Ruler:  ----5---10----5---20----5---30----5---40----5---50----5---60"
             MODNAME="Device Driver Framework (including /dev/null)..."
             FEATURE_SIZE=$(( FEATURE_SIZE+${DEC} ))
             ;;
-        "eventflag.cpp.o")
+		"eventflag.c.o")
             #Ruler:  ----5---10----5---20----5---30----5---40----5---50----5---60"
             MODNAME="Synchronization Object - Event Flag............."
             SYNCOBJ_SIZE=$(( SYNCOBJ_SIZE+${DEC} ))
             ;;
-        "ll.cpp.o")
+		"ll.c.o")
             #Ruler:  ----5---10----5---20----5---30----5---40----5---50----5---60"
             MODNAME="Fundamental Kernel Linked-List Classes.........."
             KERNEL_SIZE=$(( KERNEL_SIZE+${DEC} ))
             ;;
-        "message.cpp.o")
+		"message.c.o")
             #Ruler:  ----5---10----5---20----5---30----5---40----5---50----5---60"
             MODNAME="Message-based IPC..............................."
             SYNCOBJ_SIZE=$(( SYNCOBJ_SIZE+${DEC} ))
             ;;
-        "mutex.cpp.o")
+		"mutex.c.o")
             #Ruler:  ----5---10----5---20----5---30----5---40----5---50----5---60"
             MODNAME="Mutex (Synchronization Object).................."
             SYNCOBJ_SIZE=$(( SYNCOBJ_SIZE+${DEC} ))
             ;;
-        "profile.cpp.o")
+		"profile.c.o")
             #Ruler:  ----5---10----5---20----5---30----5---40----5---50----5---60"
             MODNAME="Performance-profiling timers...................."
             FEATURE_SIZE=$(( FEATURE_SIZE+${DEC} ))
             ;;
-        "quantum.cpp.o")
+		"quantum.c.o")
             #Ruler:  ----5---10----5---20----5---30----5---40----5---50----5---60"
             MODNAME="Round-Robin Scheduling Support.................."
             FEATURE_SIZE=$(( FEATURE_SIZE+${DEC} ))
             ;;
-        "scheduler.cpp.o")
+		"scheduler.c.o")
             #Ruler:  ----5---10----5---20----5---30----5---40----5---50----5---60"
             MODNAME="Thread Scheduling..............................."
             KERNEL_SIZE=$(( KERNEL_SIZE+${DEC} ))
             ;;
-        "ksemaphore.cpp.o")
+		"ksemaphore.c.o")
             #Ruler:  ----5---10----5---20----5---30----5---40----5---50----5---60"
             MODNAME="Semaphore (Synchronization Object).............."
             SYNCOBJ_SIZE=$(( SYNCOBJ_SIZE+${DEC} ))
             ;;
-        "thread.cpp.o")
+		"thread.c.o")
             #Ruler:  ----5---10----5---20----5---30----5---40----5---50----5---60"
             MODNAME="Thread Implementation..........................."
             KERNEL_SIZE=$(( KERNEL_SIZE+${DEC} ))
             ;;
-        "threadlist.cpp.o")
+		"threadlist.c.o")
             #Ruler:  ----5---10----5---20----5---30----5---40----5---50----5---60"
             MODNAME="Fundamental Kernel Thread-list Data Structures.."
             KERNEL_SIZE=$(( KERNEL_SIZE+${DEC} ))
             ;;
-        "kernel.cpp.o")
+		"kernel.c.o")
             #Ruler:  ----5---10----5---20----5---30----5---40----5---50----5---60"
             MODNAME="Mark3 Kernel Base Class........................."
             KERNEL_SIZE=$(( KERNEL_SIZE+${DEC} ))
             ;;
-        "timerlist.cpp.o")
+		"timerlist.c.o")
             #Ruler:  ----5---10----5---20----5---30----5---40----5---50----5---60"
             MODNAME="Software Timer Management......................."
             FEATURE_SIZE=$(( FEATURE_SIZE+${DEC} ))
+			;;
+		"timerscheduler.c.o")
+			#Ruler:  ----5---10----5---20----5---30----5---40----5---50----5---60"
+			MODNAME="Software Timer Scheduler........................"
+			FEATURE_SIZE=$(( FEATURE_SIZE+${DEC} ))
             ;;
-        "timer.cpp.o")
+		"timer.c.o")
             #Ruler:  ----5---10----5---20----5---30----5---40----5---50----5---60"
             MODNAME="Software Timer Kernel Object...................."
             FEATURE_SIZE=$(( FEATURE_SIZE+${DEC} ))
             ;;
-        "transaction.cpp.o")
+		"transaction.c.o")
             #Ruler:  ----5---10----5---20----5---30----5---40----5---50----5---60"
             MODNAME="Kernel Transaction Queues......................."
             KERNEL_SIZE=$(( KERNEL_SIZE+${DEC} ))
             ;;
-        "tracebuffer.cpp.o")
+		"tracebuffer.c.o")
             #Ruler:  ----5---10----5---20----5---30----5---40----5---50----5---60"
             MODNAME="Runtime Kernel Trace Implementation............."
             FEATURE_SIZE=$(( FEATURE_SIZE+${DEC} ))
             ;;
-        "writebuf16.cpp.o")
+		"writebuf16.c.o")
             #Ruler:  ----5---10----5---20----5---30----5---40----5---50----5---60"
             MODNAME="Circular Logging Buffer Base Class.............."
             FEATURE_SIZE=$(( FEATURE_SIZE+${DEC} ))
             ;;
-        "threadport.cpp.o")
+		"threadport.c.o")
             #Ruler:  ----5---10----5---20----5---30----5---40----5---50----5---60"
             MODNAME="${ARCH_STRING} - Basic Threading Support.............."
             PORT_SIZE=$(( PORT_SIZE+${DEC} ))
             ;;
-        "kernelswi.cpp.o")
+		"kernelswi.c.o")
             #Ruler:  ----5---10----5---20----5---30----5---40----5---50----5---60"
             MODNAME="${ARCH_STRING} - Kernel Interrupt Implemenation......."
             PORT_SIZE=$(( PORT_SIZE+${DEC} ))
             ;;
-        "kerneltimer.cpp.o")
+		"kerneltimer.c.o")
             #Ruler:  ----5---10----5---20----5---30----5---40----5---50----5---60"
             MODNAME="${ARCH_STRING} - Kernel Timer Implementation.........."
             PORT_SIZE=$(( PORT_SIZE+${DEC} ))
             ;;
-        "kprofile.cpp.o")
+		"kprofile.c.o")
             #Ruler:  ----5---10----5---20----5---30----5---40----5---50----5---60"
             MODNAME="${ARCH_STRING} - Profiling Timer Implementation......."
             PORT_SIZE=$(( PORT_SIZE+${DEC} ))
             ;;
-        "kernelaware.cpp.o")
+		"kernelaware.c.o")
             #Ruler:  ----5---10----5---20----5---30----5---40----5---50----5---60"
             MODNAME="${ARCH_STRING} - Kernel Aware Simulation Support......"
             PORT_SIZE=$(( PORT_SIZE+${DEC} ))
