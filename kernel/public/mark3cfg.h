@@ -13,9 +13,9 @@ See license.txt for more information
 ===========================================================================*/
 /*!
     \file mark3cfg.h
-    
+
     \brief Mark3 Kernel Configuration
-    
+
     This file is used to configure the kernel for your specific application
     in order to provide the optimal set of features for a given use case.
 
@@ -23,7 +23,7 @@ See license.txt for more information
     you can usually find a sweet spot between features and resource usage
     by picking and choosing features a-la-carte.  This config file is
     written in an "interactive" way, in order to minimize confusion about
-    what each option provides, and to make dependencies obvious.   
+    what each option provides, and to make dependencies obvious.
 */
 
 #ifndef __MARK3CFG_H__
@@ -32,7 +32,7 @@ See license.txt for more information
 /*!
     The following options is related to all kernel time-tracking.
 
-    -timers provide a way for events to be periodically triggered in a 
+    -timers provide a way for events to be periodically triggered in a
      lightweight manner.  These can be periodic, or one-shot.
 
     -Thread_t Quantum (used for round-robin scheduling) is dependent on this
@@ -82,13 +82,13 @@ See license.txt for more information
 /*!
     Do you want to enable time quanta?  This is useful when you want to have
     tasks in the same priority group share time in a controlled way.  This
-    allows equal tasks to use unequal amounts of the CPU, which is a great 
+    allows equal tasks to use unequal amounts of the CPU, which is a great
     way to set up CPU budgets per thread in a round-robin scheduling system.
-    If enabled, you can specify a number of ticks that serves as the default 
-    time period (quantum).  Unless otherwise specified, every thread in a 
+    If enabled, you can specify a number of ticks that serves as the default
+    time period (quantum).  Unless otherwise specified, every thread in a
     priority will get the default quantum.
 */
-#if KERNEL_USE_TIMERS    
+#if KERNEL_USE_TIMERS
     #define KERNEL_USE_QUANTUM           (1)
 #else
     #define KERNEL_USE_QUANTUM           (0)
@@ -101,9 +101,9 @@ See license.txt for more information
 #define THREAD_QUANTUM_DEFAULT           (4)
 
 /*!
-    Do you want the ability to use counting/binary semaphores for thread 
+    Do you want the ability to use counting/binary semaphores for thread
     synchronization?  Enabling this features provides fully-blocking semaphores
-    and enables all API functions declared in semaphore.h.  If you have to 
+    and enables all API functions declared in semaphore.h.  If you have to
     pick one blocking mechanism, this is the one to choose.
 */
 #define KERNEL_USE_SEMAPHORE             (1)
@@ -155,7 +155,7 @@ See license.txt for more information
 #endif
 
 /*!
-    Enabling device drivers provides a posix-like filesystem interface for 
+    Enabling device drivers provides a posix-like filesystem interface for
     peripheral device drivers.
 */
 #define KERNEL_USE_DRIVER                (0)
@@ -165,7 +165,7 @@ See license.txt for more information
     thread in the system.  Adds a const K_CHAR* pointer to the size
     of the thread object.
 */
-#define KERNEL_USE_THREADNAME            (1)
+#define KERNEL_USE_THREADNAME            (0)
 
 /*!
     Provide extra Thread_t methods to allow the application to create
@@ -182,16 +182,16 @@ See license.txt for more information
 #define KERNEL_USE_PROFILER              (1)
 
 /*!
-    Provides extra logic for kernel debugging, and instruments the kernel 
+    Provides extra logic for kernel debugging, and instruments the kernel
     with extra asserts, and kernel trace functionality.
 */
-#define KERNEL_USE_DEBUG                 (1)
+#define KERNEL_USE_DEBUG                 (0)
 
 /*!
     Provides support for atomic operations, including addition, subtraction,
     set, and test-and-set.  Add/Sub/Set contain 8, 16, and 32-bit variants.
 */
-#define KERNEL_USE_ATOMIC                (1)
+#define KERNEL_USE_ATOMIC                (0)
 
 /*!
     "Safe unlinking" performs extra checks on data to make sure that there
@@ -199,7 +199,7 @@ See license.txt for more information
     goes beyond pointer checks, adding a layer of structural and metadata
     validation to help detect system corruption early.
 */
-#define SAFE_UNLINK                      (1)
+#define SAFE_UNLINK                      (0)
 
 /*!
     Include support for kernel-aware simulation.  Enabling this feature

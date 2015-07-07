@@ -58,7 +58,8 @@ static const K_UCHAR aucCLZ[16] ={255,0,1,1,2,2,2,2,3,3,3,3,3,3,3,3};
 void Scheduler_Init()
 {
     m_ucPriFlag = 0;
-    for (int i = 0; i < NUM_PRIORITIES; i++)
+    uint8_t i;
+    for (i = 0; i < NUM_PRIORITIES; i++)
     {
         ThreadList_Init( &m_aclPriorities[i] );
         ThreadList_SetPriority( &m_aclPriorities[i], i );
