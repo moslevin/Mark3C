@@ -268,4 +268,3 @@ const K_CHAR *Driver_GetPath( Driver_t *pstDriver_ ) { return m_pcPath; }
 
 #endif
 
-#endif
