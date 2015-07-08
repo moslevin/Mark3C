@@ -21,14 +21,17 @@ See license.txt for more information
 #ifndef __KERNEL_AWARE_H__
 #define __KERNEL_AWARE_H__
 
-#include "kerneltypes.h"
 #include "mark3cfg.h"
+#include "kerneltypes.h"
 
 #if KERNEL_AWARE_SIMULATION
 
 #ifdef __cplusplus
     extern "C" {
 #endif
+
+extern volatile K_BOOL         g_bIsKernelAware;        //!< Will be set to true by a kernel-aware host.
+extern volatile K_UCHAR        g_ucKACommand;           //!< Kernel-aware simulator command to execute
 
 //---------------------------------------------------------------------------
 /*!

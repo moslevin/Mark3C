@@ -32,6 +32,7 @@ See license.txt for more information
 #include "kernelprofile.h"
 #include "tracebuffer.h"
 #include "kerneldebug.h"
+#include "kernelaware.h"
 
 K_BOOL m_bIsStarted;
 K_BOOL m_bIsPanic;
@@ -54,6 +55,11 @@ void Kernel_Init(void)
     m_bIsStarted = false;
     m_bIsPanic = false;
     m_pfPanic = 0;
+
+#if KERNEL_AWARE_SIMULATION
+    g_ucKACommand = KA_COMMAND_IDLE;
+    g_bIsKernelAware = g_bIsKernelAware;
+#endif
 
 #if KERNEL_USE_DEBUG & !KERNEL_AWARE_SIMULATION
 	TraceBuffer_Init();

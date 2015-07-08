@@ -3,7 +3,7 @@
 CC=avr-gcc
 CPP=avr-gcc
 
-CFLAGS=-funsigned-char -funsigned-bitfields -Os -fpack-struct -fshort-enums -Wall -pedantic -c -mmcu=$(VARIANT) -I~/atmel/avr/include -DAVR -DK_ADDR=K_USHORT -DK_WORD=uint8_t
+CFLAGS=-funsigned-char -funsigned-bitfields -Os -fpack-struct -ffunction-sections -fshort-enums -Wall -c -mmcu=$(VARIANT) -I~/atmel/avr/include -DAVR -DK_ADDR=K_USHORT -DK_WORD=uint8_t
 CPPFLAGS=-funsigned-char -funsigned-bitfields -Os -fpack-struct -ffunction-sections -fshort-enums -Wall -c -mmcu=$(VARIANT) -I~/atmel/avr/include -DAVR -DK_ADDR=K_USHORT -DK_WORD=uint8_t
 
 LINK=avr-gcc
