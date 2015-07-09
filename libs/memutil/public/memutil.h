@@ -100,7 +100,7 @@ K_USHORT MemUtil_Checksum16( const void *pvSrc_, K_USHORT usLen_ );
     \return length of the string (in bytes), not including the 0-terminator.
 
 */
-K_USHORT StringLength( const char *szStr_ );
+K_USHORT MemUtil_StringLength( const char *szStr_ );
 
 //-----------------------------------------------------------------------
 /*!
