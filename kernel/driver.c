@@ -22,6 +22,7 @@ See license.txt for more information
 #include "mark3cfg.h"
 #include "kerneldebug.h"
 #include "driver.h"
+#include "ll.h"
 
 //---------------------------------------------------------------------------
 #if defined __FILE_ID__
@@ -34,35 +35,22 @@ See license.txt for more information
 
 static DoubleLinkList_t m_clDriverList;
 
-#if 0
 /*!
 	This class implements the "default" driver (/dev/null)
 */
-
-//---------------------------------------------------------------------------
-static K_USHORT DevNullRead( K_USHORT usBytes_, K_UCHAR *pucData_)
-{
-    return usBytes_;
-}
-
-//---------------------------------------------------------------------------
-static K_USHORT DevNullWrite( K_USHORT usBytes_, K_UCHAR *pucData_)
-{
-    return usBytes_;
-}
 
 //---------------------------------------------------------------------------
 static DriverVTable_t stDevNullVT =
 {
     0,
     0,
-    DevNullRead,
-    DevNullWrite,
+    0,
+    0,
     0
 };
 
 //---------------------------------------------------------------------------
-static Driver_t stDevNull;
+static Driver_t stDevNull = { .pstVTable = &stDevNullVT, .szName = "/dev/null" };
 
 //---------------------------------------------------------------------------
 /*!
@@ -98,33 +86,94 @@ static K_UCHAR DrvCmp( const K_CHAR *szStr1_, const K_CHAR *szStr2_ )
 }
 
 //---------------------------------------------------------------------------
-void DriverList_Init()
+void DriverList_Init( void )
 {
     // Ensure we always have at least one entry - a default in case no match
     // is found (/dev/null)
-	clDevNull.Init();
-	Add(&clDevNull);
+    DoubleLinkList_Init( (DoubleLinkList_t*)&m_clDriverList );
+    DoubleLinkList_Add( (DoubleLinkList_t*)&m_clDriverList, (LinkListNode_t*)&stDevNull);
 }
 
 //---------------------------------------------------------------------------
-Driver *DriverList_FindByPath( const K_CHAR *m_pcPath )
+Driver_t *DriverList_FindByPath( const K_CHAR *m_pcPath )
 {
 	KERNEL_ASSERT( m_pcPath );
-	Driver *pstTemp = static_cast<Driver*>(m_clDriverList.GetHead());
+    Driver_t *pstTemp;
+
+    pstTemp = (Driver_t*)(LinkList_GetHead( (LinkList_t*)&m_clDriverList ) );
 	
     // Iterate through the list of drivers until we find a match, or we
     // exhaust our list of installed drivers
 	while (pstTemp)
 	{
-		if(DrvCmp(m_pcPath, pstTemp->GetPath()))
+
+        if( DrvCmp( m_pcPath, Driver_GetPath( pstTemp ) ) )
 		{
 			return pstTemp;
 		}
-		pstTemp = static_cast<Driver*>(pstTemp->GetNext());
+        pstTemp = (Driver_t*)(LinkListNode_GetNext( (LinkListNode_t*)pstTemp ) );
 	}
     // No matching driver found - return a pointer to our /dev/null driver
-	return &clDevNull;
+    return &stDevNull;
 }
-#endif
+
+//---------------------------------------------------------------------------
+void Driver_SetName( Driver_t *pstDriver_, const K_CHAR *pcName_ )
+{
+    pstDriver_->szName = pcName_;
+}
+
+//---------------------------------------------------------------------------
+const K_CHAR *Driver_GetPath( Driver_t *pstDriver_ )
+{
+    return pstDriver_->szName;
+}
+
+//---------------------------------------------------------------------------
+K_UCHAR Driver_Open( Driver_t *pstDriver_ )
+{
+    if ( pstDriver_->pstVTable->pfOpen )
+    {
+        return pstDriver_->pstVTable->pfOpen( pstDriver_ );
+    }
+    return 0;
+}
+//---------------------------------------------------------------------------
+K_UCHAR Driver_Close( Driver_t *pstDriver_ )
+{
+    if ( pstDriver_->pstVTable->pfClose )
+    {
+        return pstDriver_->pstVTable->pfClose( pstDriver_ );
+    }
+    return 0;
+}
+
+//---------------------------------------------------------------------------
+K_USHORT Driver_Read( Driver_t *pstDriver_, K_USHORT usSize_, K_UCHAR *pucData_ )
+{
+    if ( pstDriver_->pstVTable->pfRead )
+    {
+        return pstDriver_->pstVTable->pfRead( pstDriver_, usSize_, pucData_ );
+    }
+    return usSize_;
+}
+//---------------------------------------------------------------------------
+K_USHORT Driver_Write( Driver_t *pstDriver_, K_USHORT usSize_, K_UCHAR *pucData_ )
+{
+    if ( pstDriver_->pstVTable->pfWrite )
+    {
+        return pstDriver_->pstVTable->pfWrite( pstDriver_, usSize_, pucData_ );
+    }
+    return usSize_;
+}
+//---------------------------------------------------------------------------
+K_USHORT Driver_Control( Driver_t *pstDriver_, K_USHORT usEvent_, K_USHORT usInSize_, K_UCHAR *pucIn_, K_USHORT usOutSize_, K_UCHAR *pucOut_)
+{
+    if ( pstDriver_->pstVTable->pfControl )
+    {
+        return pstDriver_->pstVTable->pfControl( pstDriver_, usEvent_, usInSize_, pucIn_, usOutSize_, pucOut_);
+    }
+    return 0;
+}
 
 #endif

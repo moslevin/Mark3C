@@ -158,7 +158,7 @@ See license.txt for more information
     Enabling device drivers provides a posix-like filesystem interface for
     peripheral device drivers.
 */
-#define KERNEL_USE_DRIVER                (0)
+#define KERNEL_USE_DRIVER                (1)
 
 /*!
     Provide Thread_t method to allow the user to set a name for each

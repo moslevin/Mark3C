@@ -117,11 +117,11 @@ See license.txt for more information
 #endif
 
 //---------------------------------------------------------------------------
-typedef void* (*OpenFunc_t)(void);
-typedef K_UCHAR (*CloseFunc_t)(void);
-typedef K_USHORT (*ReadFunc_t)(K_USHORT usSize_, K_UCHAR *pucData_ );
-typedef K_USHORT (*WriteFunc_t)(K_USHORT usSize_, K_UCHAR *pucData_ );
-typedef K_USHORT (*ControlFunc_t)(K_USHORT usInSize_, K_UCHAR *pucIn_, K_USHORT usOutSize_, K_UCHAR *pucOut_);
+typedef K_UCHAR (*OpenFunc_t)(void *pvCtx_);
+typedef K_UCHAR (*CloseFunc_t)(void *pvCtx_);
+typedef K_USHORT (*ReadFunc_t)(void *pvCtx_, K_USHORT usSize_, K_UCHAR *pucData_ );
+typedef K_USHORT (*WriteFunc_t)(void *pvCtx_, K_USHORT usSize_, K_UCHAR *pucData_ );
+typedef K_USHORT (*ControlFunc_t)(void *pvCtx, K_USHORT usEvent_, K_USHORT usInSize_, K_UCHAR *pucIn_, K_USHORT usOutSize_, K_UCHAR *pucOut_);
 
 //---------------------------------------------------------------------------
 typedef struct
@@ -129,7 +129,7 @@ typedef struct
     OpenFunc_t        pfOpen;
     CloseFunc_t       pfClose;
     ReadFunc_t        pfRead;
-    WriteFunc_t       pfWrite
+    WriteFunc_t       pfWrite;
     ControlFunc_t     pfControl;
 } DriverVTable_t;
 
@@ -156,6 +156,7 @@ typedef struct
 */
 void Driver_Init( Driver_t *pstDriver_ );
 
+//---------------------------------------------------------------------------
 /*!
     \fn K_UCHAR Open()
 
@@ -165,6 +166,7 @@ void Driver_Init( Driver_t *pstDriver_ );
 */
 K_UCHAR Driver_Open( Driver_t *pstDriver_ );
 
+//---------------------------------------------------------------------------
 /*!
     \fn K_UCHAR Close()
 
@@ -174,6 +176,7 @@ K_UCHAR Driver_Open( Driver_t *pstDriver_ );
 */
 K_UCHAR Driver_Close( Driver_t *pstDriver_ );
 
+//---------------------------------------------------------------------------
 /*!
     \fn K_USHORT Read( K_USHORT usBytes_,
                              K_UCHAR *pucData_)
@@ -191,7 +194,7 @@ K_UCHAR Driver_Close( Driver_t *pstDriver_ );
 */
 K_USHORT Driver_Read( Driver_t *pstDriver_, K_USHORT usSize_, K_UCHAR *pucData_ );
 
-
+//---------------------------------------------------------------------------
 /*!
     \fn K_USHORT Write( K_USHORT usBytes_,
                               K_UCHAR *pucData_)
@@ -210,7 +213,7 @@ K_USHORT Driver_Read( Driver_t *pstDriver_, K_USHORT usSize_, K_UCHAR *pucData_ 
 */
 K_USHORT Driver_Write( Driver_t *pstDriver_, K_USHORT usSize_, K_UCHAR *pucData_ );
 
-
+//---------------------------------------------------------------------------
 /*!
     \fn K_USHORT Control( K_USHORT usEvent_,
                                 void *pvDataIn_,
@@ -233,9 +236,9 @@ K_USHORT Driver_Write( Driver_t *pstDriver_, K_USHORT usSize_, K_UCHAR *pucData_
 
     \return Driver-specific return code, 0 = OK, non-0 = error
 */
-K_USHORT Driver_Control( Driver_t *pstDriver_, K_USHORT usInSize_, K_UCHAR *pucIn_, K_USHORT usOutSize_, K_UCHAR *pucOut_);
+K_USHORT Driver_Control( Driver_t *pstDriver_, K_USHORT usEvent_, K_USHORT usInSize_, K_UCHAR *pucIn_, K_USHORT usOutSize_, K_UCHAR *pucOut_);
 
-
+//---------------------------------------------------------------------------
 /*!
     \fn void SetName( const K_CHAR *pcName_ )
 
@@ -244,8 +247,9 @@ K_USHORT Driver_Control( Driver_t *pstDriver_, K_USHORT usInSize_, K_UCHAR *pucI
 
     \param pcName_ String constant containing the device path
 */
-void Driver_SetName( Driver_t *pstDriver_, const K_CHAR *pcName_ ) { m_pcPath = pcName_; }
+void Driver_SetName( Driver_t *pstDriver_, const K_CHAR *pcName_ );
 
+//---------------------------------------------------------------------------
 /*!
     \fn const K_CHAR *GetPath()
 
@@ -253,13 +257,18 @@ void Driver_SetName( Driver_t *pstDriver_, const K_CHAR *pcName_ ) { m_pcPath = 
 
     \return pcName_ Return the string constant representing the device path
 */
-const K_CHAR *Driver_GetPath( Driver_t *pstDriver_ ) { return m_pcPath; }
+const K_CHAR *Driver_GetPath( Driver_t *pstDriver_ );
 
 //---------------------------------------------------------------------------
 /*!
     List of Driver objects used to keep track of all device drivers in the 
     system.  By default, the list contains a single entity, "/dev/null".
 */
+void DriverList_Init( void );
+
+//---------------------------------------------------------------------------
+Driver_t *DriverList_FindByPath( const K_CHAR *m_pcPath );
+
 #ifdef __cplusplus
     }
 #endif
