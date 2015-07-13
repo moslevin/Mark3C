@@ -54,9 +54,9 @@ typedef enum
 
 //---------------------------------------------------------------------------
 /*!
- * \brief The KernelAware class
+ * \brief The KernelAware object
  *
- * This class contains functions that are used to trigger kernel-aware
+ * This object contains functions that are used to trigger kernel-aware
  * functionality within a supported simulation environment (i.e. flAVR).
  *
  * These static methods operate on a singleton set of global variables,

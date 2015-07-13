@@ -15,10 +15,10 @@ See license.txt for more information
 
     \file   thread.h    
 
-    \brief  Platform independent thread class declarations
+    \brief  Platform independent thread object declarations
     
     Threads are an atomic unit of execution, and each instance of the thread
-    class represents an instance of a program running of the processor.
+    object represents an instance of a program running of the processor.
     The Thread_t is the fundmanetal user-facing object in the kernel - it
     is what makes multiprocessing possible from application code.
     
@@ -26,7 +26,7 @@ See license.txt for more information
     all of the registers required to multiplex a processor between multiple 
     threads.
     
-    The Thread_t class inherits directly from the LinkListNode_t class to 
+    The Thread_t object inherits directly from the LinkListNode_t object to 
     facilitate efficient thread management using Double, or Double-Circular
     linked lists.
     
@@ -466,7 +466,7 @@ void Thread_SetPriorityBase( Thread_t *pstThread_, K_UCHAR ucPriority_);
     needed to support the tick-based/tickless times -- while saving a fairly
     decent chunk of RAM on a small micro.
 
-    Note that this struct must have the same memory layout as the Thread_t class
+    Note that this struct must have the same memory layout as the Thread_t object
     up to the last item.
 */
 typedef struct

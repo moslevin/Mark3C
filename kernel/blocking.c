@@ -15,7 +15,7 @@ See license.txt for more information
 
     \file   blocking.cpp
 
-    \brief  Implementation of base class for blocking objects
+    \brief  Implementation of base object for blocking objects
 */
 
 #include "kerneltypes.h"

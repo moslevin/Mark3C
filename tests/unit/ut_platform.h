@@ -89,6 +89,8 @@ extern void run_tests();
 
 //---------------------------------------------------------------------------
 void PrintString(const K_CHAR *szStr_);
+//---------------------------------------------------------------------------
+void MyUnitTest_PrintTestResult( UnitTest_t *pstTest_ );
 
 
 #endif //__UT_PLATFORM_H__

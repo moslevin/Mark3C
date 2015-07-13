@@ -36,7 +36,7 @@ See license.txt for more information
 static DoubleLinkList_t m_clDriverList;
 
 /*!
-	This class implements the "default" driver (/dev/null)
+	This object implements the "default" driver (/dev/null)
 */
 
 //---------------------------------------------------------------------------

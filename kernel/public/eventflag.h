@@ -33,7 +33,7 @@ See license.txt for more information
 
 //---------------------------------------------------------------------------
 /*!
- * \brief The EventFlag_t class is a blocking object, similar to a Semaphore_t or
+ * \brief The EventFlag_t object is a blocking object, similar to a Semaphore_t or
  * Mutex_t, commonly used for synchronizing thread execution based on events
  * occurring within the system.
  *

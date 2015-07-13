@@ -44,7 +44,7 @@ See license.txt for more information
     At the end of the day, that's pretty much all a device driver has to do,
     and all of the functionality that needs to be presented to the developer.
     
-    We abstract all device drivers using a base-class which implements the 
+    We abstract all device drivers using a base-object which implements the 
     following methods:
         -Start/Open
         -Stop/Close
@@ -58,8 +58,8 @@ See license.txt for more information
 
     \section DrvAPI Driver API
 
-    In C++, we can implement this as a class to abstract these event handlers, with 
-    virtual void functions in the base class overridden by the inherited
+    In C++, we can implement this as a object to abstract these event handlers, with 
+    virtual void functions in the base object overridden by the inherited
     objects.
 
     To add and remove device drivers from the global table, we use the 
@@ -145,8 +145,8 @@ typedef struct
 
 //---------------------------------------------------------------------------
 /*!
-    Base device-driver class used in hardware abstraction.  All other device
-    drivers inherit from this class
+    Base device-driver object used in hardware abstraction.  All other device
+    drivers inherit from this object
 */
 
 /*!

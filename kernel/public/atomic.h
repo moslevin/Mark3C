@@ -32,9 +32,9 @@ See license.txt for more information
 #endif
 
 /*!
- * \brief The Atomic class
+ * \brief The Atomic object
  *
- * This utility class provides primatives for atomic operations - that is,
+ * This utility object provides primatives for atomic operations - that is,
  * operations that are guaranteed to execute uninterrupted.  Basic atomic
  * primatives provided here include Set/Add/Delete for 8, 16, and 32-bit
  * integer types, as well as an atomic test-and-set.

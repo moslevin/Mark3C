@@ -57,7 +57,7 @@ See license.txt for more information
 //---------------------------------------------------------------------------
 /*!
     Basic linked-list node data structure.  This data is managed by the 
-    linked-list class types, and can be used transparently between them.
+    linked-list object types, and can be used transparently between them.
 */
 typedef struct _LinkListNode
 {
@@ -100,6 +100,35 @@ do { \
 
 
 //---------------------------------------------------------------------------
+#define LinkList_Init( pstList_ ) \
+{ \
+    ((LinkList_t*)(pstList_))->m_pstHead = NULL; \
+    ((LinkList_t*)(pstList_))->m_pstTail = NULL; \
+}
+#define DoubleLinkList_Init( pstList_ )     (LinkList_Init( ((LinkList_t*)(pstList_) ) ))
+#define CircularLinkList_Init( pstList_ )   (LinkList_Init( ((LinkList_t*)(pstList_) ) ))
+
+//---------------------------------------------------------------------------
+/*!
+    \fn LinkListNode_t *GetHead()
+
+    Get the head node in the linked list
+
+    \return Pointer to the head node in the list
+*/
+#define LinkList_GetHead( pstList_ )   ( ((LinkList_t*)(pstList_))->m_pstHead )
+
+//---------------------------------------------------------------------------
+/*!
+    \fn LinkListNode_t *GetTail()
+
+    Get the tail node of the linked list
+
+    \return Pointer to the tail node in the list
+*/
+#define LinkList_GetTail( pstList_ )    ( ((LinkList_t*)(pstList_))->m_pstTail )
+
+//---------------------------------------------------------------------------
 /*!
     Abstract-data-type from which all other linked-lists are derived
 */
@@ -111,32 +140,6 @@ typedef struct _LinkList
 
 //---------------------------------------------------------------------------
 /*!
-    Clear the linked list.
-*/
-void LinkList_Init( LinkList_t *pstList_ );
-
-//---------------------------------------------------------------------------
-/*!
-    \fn LinkListNode_t *GetHead()
-
-    Get the head node in the linked list
-
-    \return Pointer to the head node in the list
-*/
-LinkListNode_t *LinkList_GetHead( LinkList_t *pstList_ );
-
-//---------------------------------------------------------------------------
-/*!
-    \fn LinkListNode_t *GetTail()
-
-    Get the tail node of the linked list
-
-    \return Pointer to the tail node in the list
-*/
-LinkListNode_t *LinkList_GetTail( LinkList_t *pstList_ );
-
-//---------------------------------------------------------------------------
-/*!
     Doubly-linked-list data type, inherited from the base LinkList_t type.
 */
 typedef struct _DoubleLinkList
@@ -145,11 +148,6 @@ typedef struct _DoubleLinkList
     LinkListNode_t *m_pstTail;    //!< Pointer to the tail node in the list
 } DoubleLinkList_t;
 
-//---------------------------------------------------------------------------
-/*!
-    Default constructor - initializes the head/tail nodes to NULL
-*/
-void DoubleLinkList_Init( DoubleLinkList_t *pstList_ );
 
 //---------------------------------------------------------------------------
 /*!
@@ -180,9 +178,6 @@ typedef struct _CircularLinkList
     LinkListNode_t *m_pstHead;    //!< Pointer to the head node in the list
     LinkListNode_t *m_pstTail;    //!< Pointer to the tail node in the list
 } CircularLinkList_t;
-
-//---------------------------------------------------------------------------
-void CircularLinkList_Init( CircularLinkList_t *pstList_ );
 
 //---------------------------------------------------------------------------
 /*!

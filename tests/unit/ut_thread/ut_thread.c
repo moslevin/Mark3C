@@ -32,12 +32,12 @@ static K_WORD aucStack1[TEST_STACK_SIZE];
 static K_WORD aucStack2[TEST_STACK_SIZE];
 static K_WORD aucStack3[TEST_STACK_SIZE];
 
-static Thread_t clThread1;
-static Thread_t clThread2;
-static Thread_t clThread3;
+static Thread_t stThread1;
+static Thread_t stThread2;
+static Thread_t stThread3;
 
-static Semaphore_t clSem1;
-static Semaphore_t clSem2;
+static Semaphore_t stSem1;
+static Semaphore_t stSem2;
 
 static volatile K_ULONG ulRR1;
 static volatile K_ULONG ulRR2;
@@ -48,8 +48,8 @@ static void Thread_tEntryPoint1(void *unused_)
 {
     while(1)
     {
-        Semaphore_Pend( &clSem2 );
-        Semaphore_Post( &clSem1 );
+        Semaphore_Pend( &stSem2 );
+        Semaphore_Post( &stSem1 );
     }
 
     unused_ = unused_;
@@ -61,18 +61,18 @@ static void Thread_tEntryPoint1(void *unused_)
 TEST(ut_thread_create)
 {
     // Test point - Create a Thread_t, verify that the Thread_t actually starts.
-    Semaphore_Init( &clSem1, 0, 1);
-    Semaphore_Init( &clSem2, 0, 1);
+    Semaphore_Init( &stSem1, 0, 1);
+    Semaphore_Init( &stSem2, 0, 1);
 
     // Initialize our Thread_t
-    Thread_Init( &clThread1, aucStack1, TEST_STACK_SIZE, 7, Thread_tEntryPoint1, NULL);
+    Thread_Init( &stThread1, aucStack1, TEST_STACK_SIZE, 7, Thread_tEntryPoint1, NULL);
 
     // Start the Thread_t (Thread_ts are created in the stopped state)
-    Thread_Start( &clThread1 );
+    Thread_Start( &stThread1 );
 
     // Poke the Thread_t using a Semaphore_t, verify it's working
-    Semaphore_Post( &clSem2 );
-    Semaphore_TimedPend( &clSem1, 10 );
+    Semaphore_Post( &stSem2 );
+    Semaphore_TimedPend( &stSem1, 10 );
 
     // Ensure that the Semaphore_t was posted before we got to the 10ms timeout
     EXPECT_FALSE( Thread_GetExpired( Scheduler_GetCurrentThread() ) );
@@ -83,13 +83,13 @@ TEST_END
 TEST(ut_thread_stop)
 {
     // Test point - stop and restart a Thread_t
-    Thread_Stop( &clThread1 );
+    Thread_Stop( &stThread1 );
     Thread_Sleep(10);
-    Thread_Start( &clThread1 );
+    Thread_Start( &stThread1 );
 
     // Poke the Thread_t using a Semaphore_t, verify it's still responding
-    Semaphore_Post( &clSem2 );
-    Semaphore_TimedPend( &clSem1, 10 );
+    Semaphore_Post( &stSem2 );
+    Semaphore_TimedPend( &stSem1, 10 );
 
     EXPECT_FALSE( Thread_GetExpired( Scheduler_GetCurrentThread() ) );
 }
@@ -100,33 +100,33 @@ TEST(ut_thread_exit)
 {
     // Test point - force a Thread_t exit; ensure it doesn't respond once
     // it's un-scheduled.
-    Thread_Exit( &clThread1 );
-    Semaphore_Post( &clSem2 );
-    Semaphore_TimedPend( &clSem1, 100 );
+    Thread_Exit( &stThread1 );
+    Semaphore_Post( &stSem2 );
+    Semaphore_TimedPend( &stSem1, 100 );
 
     EXPECT_TRUE( Thread_GetExpired( Scheduler_GetCurrentThread() ) );
 }
 TEST_END
 
 //===========================================================================
-static ProfileTimer_t clProfiler1;
+static ProfileTimer_t stProfiler1;
 static void Thread_tSleepEntryPoint(void *unused_)
 {
     unused_ = unused_;
 
     // Thread_t will sleep for various intervals, synchronized
     // to Semaphore_t-based IPC.
-    Semaphore_Pend( &clSem1 );
+    Semaphore_Pend( &stSem1 );
     Thread_Sleep(5);
-    Semaphore_Post( &clSem2 );
+    Semaphore_Post( &stSem2 );
 
-    Semaphore_Pend( &clSem1 );
+    Semaphore_Pend( &stSem1 );
     Thread_Sleep(50);
-    Semaphore_Post( &clSem2 );
+    Semaphore_Post( &stSem2 );
 
-    Semaphore_Pend( &clSem1 );
+    Semaphore_Pend( &stSem1 );
     Thread_Sleep(500);
-    Semaphore_Post( &clSem2 );
+    Semaphore_Post( &stSem2 );
 
     // Exit this Thread_t.
     Thread_Exit( Scheduler_GetCurrentThread() );
@@ -139,43 +139,43 @@ TEST(ut_thread_sleep)
     Profiler_Start();
 
     // Start another Thread_t, which sleeps for a various length of time
-    Semaphore_Init( &clSem1, 0, 1);
-    Semaphore_Init( &clSem2, 0, 1);
+    Semaphore_Init( &stSem1, 0, 1);
+    Semaphore_Init( &stSem2, 0, 1);
 
     // Initialize our Thread_t
-    Thread_Init( &clThread1, aucStack1, TEST_STACK_SIZE, 7, Thread_tSleepEntryPoint, NULL);
+    Thread_Init( &stThread1, aucStack1, TEST_STACK_SIZE, 7, Thread_tSleepEntryPoint, NULL);
 
     // Start the Thread_t (Thread_ts are created in the stopped state)
-    Thread_Start( &clThread1 );
+    Thread_Start( &stThread1 );
 
-    ProfileTimer_Init( &clProfiler1 );
-    ProfileTimer_Start( &clProfiler1 );
-    Semaphore_Post( &clSem1 );
-    Semaphore_Pend( &clSem2 );
-    ProfileTimer_Stop( &clProfiler1 );
-
-
-    EXPECT_GTE( (ProfileTimer_GetCurrent( &clProfiler1 ) * CLOCK_DIVIDE), (SYSTEM_FREQ / 200));
-    EXPECT_LTE( (ProfileTimer_GetCurrent( &clProfiler1 ) * CLOCK_DIVIDE), (SYSTEM_FREQ / 200) + (SYSTEM_FREQ / 200) );
-
-    ProfileTimer_Init( &clProfiler1 );
-    ProfileTimer_Start( &clProfiler1 );
-    Semaphore_Post( &clSem1 );
-    Semaphore_Pend( &clSem2 );
-    ProfileTimer_Stop( &clProfiler1 );
-
-    EXPECT_GTE( (ProfileTimer_GetCurrent( &clProfiler1 ) * CLOCK_DIVIDE), SYSTEM_FREQ / 20 );
-    EXPECT_LTE( (ProfileTimer_GetCurrent( &clProfiler1 ) * CLOCK_DIVIDE), (SYSTEM_FREQ / 20) + (SYSTEM_FREQ / 200));
+    ProfileTimer_Init( &stProfiler1 );
+    ProfileTimer_Start( &stProfiler1 );
+    Semaphore_Post( &stSem1 );
+    Semaphore_Pend( &stSem2 );
+    ProfileTimer_Stop( &stProfiler1 );
 
 
-    ProfileTimer_Init( &clProfiler1 );
-    ProfileTimer_Start( &clProfiler1 );
-    Semaphore_Post( &clSem1 );
-    Semaphore_Pend( &clSem2 );
-    ProfileTimer_Stop( &clProfiler1 );
+    EXPECT_GTE( (ProfileTimer_GetCurrent( &stProfiler1 ) * CLOCK_DIVIDE), (SYSTEM_FREQ / 200));
+    EXPECT_LTE( (ProfileTimer_GetCurrent( &stProfiler1 ) * CLOCK_DIVIDE), (SYSTEM_FREQ / 200) + (SYSTEM_FREQ / 200) );
 
-    EXPECT_GTE( (ProfileTimer_GetCurrent( &clProfiler1 ) * CLOCK_DIVIDE), SYSTEM_FREQ / 2 );
-    EXPECT_LTE( (ProfileTimer_GetCurrent( &clProfiler1 ) * CLOCK_DIVIDE), (SYSTEM_FREQ / 2) + (SYSTEM_FREQ / 200) );
+    ProfileTimer_Init( &stProfiler1 );
+    ProfileTimer_Start( &stProfiler1 );
+    Semaphore_Post( &stSem1 );
+    Semaphore_Pend( &stSem2 );
+    ProfileTimer_Stop( &stProfiler1 );
+
+    EXPECT_GTE( (ProfileTimer_GetCurrent( &stProfiler1 ) * CLOCK_DIVIDE), SYSTEM_FREQ / 20 );
+    EXPECT_LTE( (ProfileTimer_GetCurrent( &stProfiler1 ) * CLOCK_DIVIDE), (SYSTEM_FREQ / 20) + (SYSTEM_FREQ / 200));
+
+
+    ProfileTimer_Init( &stProfiler1 );
+    ProfileTimer_Start( &stProfiler1 );
+    Semaphore_Post( &stSem1 );
+    Semaphore_Pend( &stSem2 );
+    ProfileTimer_Stop( &stProfiler1 );
+
+    EXPECT_GTE( (ProfileTimer_GetCurrent( &stProfiler1 ) * CLOCK_DIVIDE), SYSTEM_FREQ / 2 );
+    EXPECT_LTE( (ProfileTimer_GetCurrent( &stProfiler1 ) * CLOCK_DIVIDE), (SYSTEM_FREQ / 2) + (SYSTEM_FREQ / 200) );
 
     Profiler_Stop();
 }
@@ -202,9 +202,9 @@ TEST(ut_roundrobin)
     // Create three Thread_ts that only increment counters, and keep them at
     // the same priority in order to test the roundrobin functionality of
     // the scheduler
-    Thread_Init( &clThread1, aucStack1, TEST_STACK_SIZE, 1, RR_EntryPoint, (void*)&ulRR1);
-    Thread_Init( &clThread2, aucStack2, TEST_STACK_SIZE, 1, RR_EntryPoint, (void*)&ulRR2);
-    Thread_Init( &clThread3, aucStack3, TEST_STACK_SIZE, 1, RR_EntryPoint, (void*)&ulRR3);
+    Thread_Init( &stThread1, aucStack1, TEST_STACK_SIZE, 1, RR_EntryPoint, (void*)&ulRR1);
+    Thread_Init( &stThread2, aucStack2, TEST_STACK_SIZE, 1, RR_EntryPoint, (void*)&ulRR2);
+    Thread_Init( &stThread3, aucStack3, TEST_STACK_SIZE, 1, RR_EntryPoint, (void*)&ulRR3);
 
     ulRR1 = 0;
     ulRR2 = 0;
@@ -213,17 +213,17 @@ TEST(ut_roundrobin)
     // Adjust Thread_t priority before starting test Thread_ts to ensure
     // they all start at the same time (when we hit the 1 second sleep)
     Thread_SetPriority( Scheduler_GetCurrentThread(), 2);
-    Thread_Start( &clThread1 );
-    Thread_Start( &clThread2 );
-    Thread_Start( &clThread3 );
+    Thread_Start( &stThread1 );
+    Thread_Start( &stThread2 );
+    Thread_Start( &stThread3 );
 
     Thread_Sleep(5000);
 
     // When the sleep ends, this will preempt the Thread_t in progress,
     // allowing us to stop them, and drop priority.
-    Thread_Stop( &clThread1 );
-    Thread_Stop( &clThread2 );
-    Thread_Stop( &clThread3 );
+    Thread_Stop( &stThread1 );
+    Thread_Stop( &stThread2 );
+    Thread_Stop( &stThread3 );
     Thread_SetPriority( Scheduler_GetCurrentThread(), 1);
 
     // Compare the three counters - they should be nearly identical
@@ -277,9 +277,9 @@ TEST(ut_quanta)
     // Create three Thread_ts that only increment counters - similar to the
     // previous test.  However, modify the Thread_t quanta such that each Thread_t
     // will get a different proportion of the CPU cycles.
-    Thread_Init( &clThread1, aucStack1, TEST_STACK_SIZE, 1, RR_EntryPoint, (void*)&ulRR1);
-    Thread_Init( &clThread2, aucStack2, TEST_STACK_SIZE, 1, RR_EntryPoint, (void*)&ulRR2);
-    Thread_Init( &clThread3, aucStack3, TEST_STACK_SIZE, 1, RR_EntryPoint, (void*)&ulRR3);
+    Thread_Init( &stThread1, aucStack1, TEST_STACK_SIZE, 1, RR_EntryPoint, (void*)&ulRR1);
+    Thread_Init( &stThread2, aucStack2, TEST_STACK_SIZE, 1, RR_EntryPoint, (void*)&ulRR2);
+    Thread_Init( &stThread3, aucStack3, TEST_STACK_SIZE, 1, RR_EntryPoint, (void*)&ulRR3);
 
     ulRR1 = 0;
     ulRR2 = 0;
@@ -290,21 +290,21 @@ TEST(ut_quanta)
     Thread_SetPriority( Scheduler_GetCurrentThread(), 2);
 
     // Set a different execution quanta for each Thread_t
-    Thread_SetQuantum( &clThread1, 3);
-    Thread_SetQuantum( &clThread2, 6);
-    Thread_SetQuantum( &clThread3, 9);
+    Thread_SetQuantum( &stThread1, 3);
+    Thread_SetQuantum( &stThread2, 6);
+    Thread_SetQuantum( &stThread3, 9);
 
-    Thread_Start( &clThread1 );
-    Thread_Start( &clThread2 );
-    Thread_Start( &clThread3 );
+    Thread_Start( &stThread1 );
+    Thread_Start( &stThread2 );
+    Thread_Start( &stThread3 );
 
     Thread_Sleep(1800);
 
     // When the sleep ends, this will preempt the Thread_t in progress,
     // allowing us to stop them, and drop priority.
-    Thread_Stop( &clThread1 );
-    Thread_Stop( &clThread2 );
-    Thread_Stop( &clThread3 );
+    Thread_Stop( &stThread1 );
+    Thread_Stop( &stThread2 );
+    Thread_Stop( &stThread3 );
     Thread_SetPriority( Scheduler_GetCurrentThread(), 1);
 
     // Test point - make sure that Q3 > Q2 > Q1
@@ -316,7 +316,7 @@ TEST(ut_quanta)
     ulRR2 *= 3;
     ulRR2 = (ulRR2 + 1) / 2;
 
-    // After scaling, they should be nearly identical (well, close at least)
+    // After scaling, they should be nearly identical (well, stose at least)
     if (ulRR1 > ulRR2)
     {
         ulMax = ulRR1;

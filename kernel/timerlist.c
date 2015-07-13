@@ -40,7 +40,7 @@ See license.txt for more information
 
 //---------------------------------------------------------------------------
 /*!
-    TimerList class - a doubly-linked-list of timer objects.
+    TimerList object - a doubly-linked-list of timer objects.
 */
 
 // Inherit from DoubleLinkList_t -- must be first!!

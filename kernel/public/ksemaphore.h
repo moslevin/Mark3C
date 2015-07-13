@@ -15,7 +15,7 @@ See license.txt for more information
 
     \file   ksemaphore.h    
 
-    \brief  Semaphore_t Blocking Object class declarations
+    \brief  Semaphore_t Blocking Object object declarations
 
 */
 
@@ -36,7 +36,7 @@ See license.txt for more information
 
 //---------------------------------------------------------------------------
 /*!
-    Counting Semaphore_t, based on BlockingObject base class.
+    Counting Semaphore_t, based on BlockingObject base object.
 */
 typedef struct 
 {	

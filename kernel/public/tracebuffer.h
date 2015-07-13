@@ -13,7 +13,7 @@ See license.txt for more information
 ===========================================================================*/
 /*!
 	\file tracebuffer.h
-	\brief Kernel trace buffer class declaration
+	\brief Kernel trace buffer object declaration
 	
 	Global kernel trace-buffer.  Used to instrument the kernel with lightweight
 	encoded print statements.  If something goes wrong, the tracebuffer can be

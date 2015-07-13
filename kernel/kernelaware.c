@@ -77,7 +77,7 @@ KernelAwareData_t       g_stKAData;               //!< Data structure used to co
 /*!
 * \brief Trace_i
 *
-* Private function by which the class's Trace() methods are reflected, which
+* Private function by which the object's Trace() methods are reflected, which
 * allows us to realize a modest code saving.
 *
 * \param usFile_   16-bit code representing the file

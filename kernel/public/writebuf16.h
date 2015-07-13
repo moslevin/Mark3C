@@ -41,7 +41,7 @@ typedef void (*WriteBufferCallback)( K_USHORT *pusData_, K_USHORT usSize_ );
 /*!
  * \brief The _WriteBuffer16 struct
  *
- * This class is used to provide a general-purpose, fully thread-safe circular
+ * This object is used to provide a general-purpose, fully thread-safe circular
  * buffer implementation which can be used for creating tracebuffers, data
  * logging queues, transaction queues, etc.  We use it for implementing
  * a debug print journal.

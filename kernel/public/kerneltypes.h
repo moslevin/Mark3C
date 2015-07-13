@@ -79,7 +79,7 @@ typedef enum
 
 //---------------------------------------------------------------------------
 /*!
-    This class is used for building thread-management facilities, such as 
+    This object is used for building thread-management facilities, such as 
     schedulers, and blocking objects.
 */
 struct _ThreadList

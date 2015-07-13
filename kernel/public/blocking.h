@@ -15,11 +15,11 @@ See license.txt for more information
 
     \file   blocking.h    
 
-    \brief  Blocking object base class declarations
+    \brief  Blocking object base object declarations
     
     A Blocking object in Mark3 is essentially a thread list.  Any blocking
     object implementation (being a Semaphore_t, Mutex_t, event flag, etc.) can
-    be built on top of this class, utilizing the provided functions to 
+    be built on top of this object, utilizing the provided functions to 
     manipulate thread location within the Kernel.  
     
     Blocking a thread results in that thread becoming de-scheduled, placed
@@ -29,7 +29,7 @@ See license.txt for more information
     Unblocking a thread results in the reverse:  The thread is moved back to
     its original location from the blocking list.
     
-    The only difference between a blocking object based on this class is the
+    The only difference between a blocking object based on this object is the
     logic used to determine what consitutes a Block or Unblock condition.
     
     For instance, a Semaphore_t Pend operation may result in a call to the 

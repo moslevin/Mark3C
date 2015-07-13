@@ -20,12 +20,12 @@ See license.txt for more information
 #include "message.h"
 #include "thread.h"
 
-static Thread_t clMsgThread;
+static Thread_t stMsgThread;
 
 #define MSG_STACK_SIZE  (192)
 static K_WORD aucMsgStack[MSG_STACK_SIZE];
 
-static MessageQueue_t clMsgQ;
+static MessageQueue_t stMsgQ;
 static volatile K_UCHAR ucPassCount = 0;
 
 //===========================================================================
@@ -39,7 +39,7 @@ void MsgConsumer(void *unused_)
 
     for (i = 0; i < 20; i++)
     {
-        pclMsg = MessageQueue_Receive( &clMsgQ );
+        pclMsg = MessageQueue_Receive( &stMsgQ );
         ucPassCount = 0;
 
         if (pclMsg)
@@ -105,11 +105,11 @@ TEST(ut_message_tx_rx)
 
     Message_t *pclMsg;
 
-    Thread_Init( &clMsgThread, aucMsgStack, MSG_STACK_SIZE, 7, MsgConsumer, 0);
+    Thread_Init( &stMsgThread, aucMsgStack, MSG_STACK_SIZE, 7, MsgConsumer, 0);
 
-    MessageQueue_Init( &clMsgQ );
+    MessageQueue_Init( &stMsgQ );
 
-    Thread_Start( &clMsgThread );
+    Thread_Start( &stMsgThread );
 
     // Get a message from the pool
     pclMsg = GlobalMessagePool_Pop();
@@ -119,7 +119,7 @@ TEST(ut_message_tx_rx)
     Message_SetData( pclMsg, NULL );
     Message_SetCode( pclMsg, 0 );
 
-    MessageQueue_Send( &clMsgQ, pclMsg );
+    MessageQueue_Send( &stMsgQ, pclMsg );
 
     EXPECT_EQUALS(ucPassCount, 3);
 
@@ -130,7 +130,7 @@ TEST(ut_message_tx_rx)
     Message_SetCode( pclMsg, 1337);
     Message_SetData( pclMsg, (void*)7331);
 
-    MessageQueue_Send( &clMsgQ, pclMsg);
+    MessageQueue_Send( &stMsgQ, pclMsg);
 
     EXPECT_EQUALS(ucPassCount, 3);
 
@@ -141,11 +141,11 @@ TEST(ut_message_tx_rx)
     Message_SetCode( pclMsg, 0xA0A0 );
     Message_SetData( pclMsg, (void*)0xC0C0 );
 
-    MessageQueue_Send( &clMsgQ, pclMsg );
+    MessageQueue_Send( &stMsgQ, pclMsg );
 
     EXPECT_EQUALS(ucPassCount, 3);
 
-    Thread_Exit( &clMsgThread );
+    Thread_Exit( &stMsgThread );
 }
 TEST_END
 
@@ -173,7 +173,7 @@ void MsgTimed(void *unused)
 {
     Message_t *pclRet;
     ucPassCount = 0;
-    pclRet = MessageQueue_TimedReceive( &clMsgQ, 10);
+    pclRet = MessageQueue_TimedReceive( &stMsgQ, 10);
     if (0 == pclRet)
     {
         ucPassCount++;
@@ -183,7 +183,7 @@ void MsgTimed(void *unused)
         GlobalMessagePool_Push(pclRet);
     }
 
-    pclRet = MessageQueue_TimedReceive( &clMsgQ, 1000);
+    pclRet = MessageQueue_TimedReceive( &stMsgQ, 1000);
     if (0 != pclRet)
     {
         ucPassCount++;
@@ -195,7 +195,7 @@ void MsgTimed(void *unused)
 
     while(1)
     {
-        pclRet = MessageQueue_Receive( &clMsgQ );
+        pclRet = MessageQueue_Receive( &stMsgQ );
         GlobalMessagePool_Push(pclRet);
     }
  }
@@ -213,21 +213,21 @@ TEST(ut_message_timed_rx)
     Message_SetCode( pclMsg, 0);
 
     // Test - Verify that the timed blocking in the message queues works
-    Thread_Init( &clMsgThread, aucMsgStack, MSG_STACK_SIZE, 7, MsgTimed, 0);
-    Thread_Start( &clMsgThread );
+    Thread_Init( &stMsgThread, aucMsgStack, MSG_STACK_SIZE, 7, MsgTimed, 0);
+    Thread_Start( &stMsgThread );
 
     // Just let the timeout expire
     Thread_Sleep(11);
     EXPECT_EQUALS( ucPassCount, 1 );
 
     // other thread has a timeout set... Don't leave them waiting!
-    MessageQueue_Send( &clMsgQ, pclMsg );
+    MessageQueue_Send( &stMsgQ, pclMsg );
 
     EXPECT_EQUALS( ucPassCount, 2 );
 
-    MessageQueue_Send( &clMsgQ, pclMsg );
+    MessageQueue_Send( &stMsgQ, pclMsg );
 
-    Thread_Exit( &clMsgThread );
+    Thread_Exit( &stMsgThread );
 }
 TEST_END
 

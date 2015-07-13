@@ -15,7 +15,7 @@ See license.txt for more information
 
     \file   thread.cpp
 
-    \brief  Platform-Independent thread class Definition
+    \brief  Platform-Independent thread object Definition
 
 */
 

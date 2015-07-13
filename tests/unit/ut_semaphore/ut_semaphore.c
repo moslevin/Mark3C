@@ -38,24 +38,24 @@ TEST(ut_semaphore_count)
     // maximum count of 10 can only be posted 10 times before saturaiton and
     // failure.
 
-    Semaphore_t clTestSem;
-    Semaphore_Init( &clTestSem, 0, 10 );
+    Semaphore_t stTestSem;
+    Semaphore_Init( &stTestSem, 0, 10 );
 
     int i;
     for (i = 0; i < 10; i++)
     {
-        EXPECT_TRUE(Semaphore_Post(&clTestSem));
+        EXPECT_TRUE(Semaphore_Post(&stTestSem));
     }
-    EXPECT_FALSE(Semaphore_Post(&clTestSem));
+    EXPECT_FALSE(Semaphore_Post(&stTestSem));
 }
 TEST_END
 
 //===========================================================================
-static Thread_t clThread;
+static Thread_t stThread;
 #define SEM_STACK_SIZE     (256)
 static K_WORD aucStack[SEM_STACK_SIZE];
-static Semaphore_t clSem1;
-static Semaphore_t clSem2;
+static Semaphore_t stSem1;
+static Semaphore_t stSem2;
 static volatile K_UCHAR ucCounter = 0;
 
 //===========================================================================
@@ -76,16 +76,16 @@ TEST(ut_semaphore_post_pend)
     // waiting thread to block, and that posting that Semaphore_t from a running
     // lower-priority thread awakens the higher-priority thread
 
-    Semaphore_Init( &clSem1, 0, 1);
+    Semaphore_Init( &stSem1, 0, 1);
 
-    Thread_Init( &clThread, aucStack, SEM_STACK_SIZE, 7, PostPendFunction, (void*)&clSem1);
-    Thread_Start( &clThread );
+    Thread_Init( &stThread, aucStack, SEM_STACK_SIZE, 7, PostPendFunction, (void*)&stSem1);
+    Thread_Start( &stThread );
     KernelAware_ProfileInit("seminit");
     int i;
     for (i = 0; i < 10; i++)
     {
         KernelAware_ProfileStart();
-        Semaphore_Post( &clSem1 );
+        Semaphore_Post( &stSem1 );
         KernelAware_ProfileStop();
     }
     KernelAware_ProfileReport();
@@ -94,19 +94,19 @@ TEST(ut_semaphore_post_pend)
     EXPECT_EQUALS(ucCounter, 10);
 
     // After the test is over, kill the test thread.
-    Thread_Exit( &clThread );
+    Thread_Exit( &stThread );
 
     // Test - same as above, but with a counting Semaphore_t instead of a
     // binary Semaphore_t.  Also using a default value.
-    Semaphore_Init( &clSem2, 10, 10);
+    Semaphore_Init( &stSem2, 10, 10);
 
     // Restart the test thread.
     ucCounter = 0;
-    Thread_Init( &clThread, aucStack, SEM_STACK_SIZE, 7, PostPendFunction, (void*)&clSem2);
-    Thread_Start( &clThread );
+    Thread_Init( &stThread, aucStack, SEM_STACK_SIZE, 7, PostPendFunction, (void*)&stSem2);
+    Thread_Start( &stThread );
 
     // We'll kill the thread as soon as it blocks.
-    Thread_Exit( &clThread );
+    Thread_Exit( &stThread );
 
     // Semaphore_t should have pended 10 times before returning.
     EXPECT_EQUALS(ucCounter, 10);
@@ -128,26 +128,26 @@ void TimeSemFunction(void *param_)
 //===========================================================================
 TEST(ut_semaphore_timed)
 {
-    Semaphore_t clTestSem;
-    Semaphore_t clTestSem2;
+    Semaphore_t stTestSem;
+    Semaphore_t stTestSem2;
 
-    Semaphore_Init( &clTestSem, 0,1);
+    Semaphore_Init( &stTestSem, 0,1);
 
-    Thread_Init( &clThread, aucStack, SEM_STACK_SIZE, 7, TimeSemFunction, (void*)&clTestSem);
-    Thread_Start( &clThread );
+    Thread_Init( &stThread, aucStack, SEM_STACK_SIZE, 7, TimeSemFunction, (void*)&stTestSem);
+    Thread_Start( &stThread );
 
-    EXPECT_FALSE( Semaphore_TimedPend( &clTestSem, 10 ) );
+    EXPECT_FALSE( Semaphore_TimedPend( &stTestSem, 10 ) );
     Thread_Sleep(20);
 
     // Pretty nuanced - we can only re-init the Semaphore_t under the knowledge
     // that there's nothing blocking on it already...  don't do this in
     // production
-    Semaphore_Init( &clTestSem2, 0,1);
+    Semaphore_Init( &stTestSem2, 0,1);
 
-    Thread_Init( &clThread, aucStack, SEM_STACK_SIZE, 7, TimeSemFunction, (void*)&clTestSem2);
-    Thread_Start( &clThread );
+    Thread_Init( &stThread, aucStack, SEM_STACK_SIZE, 7, TimeSemFunction, (void*)&stTestSem2);
+    Thread_Start( &stThread );
 
-    EXPECT_TRUE( Semaphore_TimedPend( &clTestSem2, 30) );
+    EXPECT_TRUE( Semaphore_TimedPend( &stTestSem2, 30) );
 }
 
 TEST_END

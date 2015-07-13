@@ -13,7 +13,7 @@ See license.txt for more information
 ===========================================================================*/
 /*!
 	\file tracebuffer.cpp
-	\brief Kernel trace buffer class definition	
+	\brief Kernel trace buffer object definition	
 */
 
 #include "kerneltypes.h"

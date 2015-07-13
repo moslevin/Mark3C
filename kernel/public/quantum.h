@@ -37,7 +37,7 @@ See license.txt for more information
 #endif
 //---------------------------------------------------------------------------
 /*!
-	Static-class used to implement Thread_t quantum functionality, which is 
+	Static-object used to implement Thread_t quantum functionality, which is 
 	a key part of round-robin scheduling.
 */
 

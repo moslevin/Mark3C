@@ -23,19 +23,19 @@
 static volatile K_UCHAR ucTestVal;
 
 //---------------------------------------------------------------------------
-static Mutex_t clMutex;
+static Mutex_t stMutex;
 
 //---------------------------------------------------------------------------
 #define TEST_STACK1_SIZE            (240)
 #define TEST_STACK2_SIZE            (240)
 #define TEST_STACK3_SIZE            (240)
 
-static MessageQueue_t clMsgQ1;
-static MessageQueue_t clMsgQ2;
+static MessageQueue_t stMsgQ1;
+static MessageQueue_t stMsgQ2;
 
-static Thread_t clTestThread2;
-static Thread_t clTestThread3;
-static Thread_t clTestThread1;
+static Thread_t stTestThread2;
+static Thread_t stTestThread3;
+static Thread_t stTestThread1;
 
 static K_WORD aucTestStack1[TEST_STACK1_SIZE];
 static K_WORD aucTestStack2[TEST_STACK2_SIZE];
@@ -84,32 +84,32 @@ void TestSemThread(Semaphore_t *pstSem_)
 //void UT_SemaphoreTest(void)
 TEST(ut_sanity_sem)
 {
-    Semaphore_t clSemaphore;
+    Semaphore_t stSemaphore;
 
-    Semaphore_Init( &clSemaphore, 0, 1);
+    Semaphore_Init( &stSemaphore, 0, 1);
 
-    Thread_Init( &clTestThread1, aucTestStack1, TEST_STACK1_SIZE, 1, (ThreadEntry_t)TestSemThread, (void*)&clSemaphore);
-    Thread_Start( &clTestThread1 );
+    Thread_Init( &stTestThread1, aucTestStack1, TEST_STACK1_SIZE, 1, (ThreadEntry_t)TestSemThread, (void*)&stSemaphore);
+    Thread_Start( &stTestThread1 );
 
     ucTestVal = 0x12;
-    Semaphore_Post( &clSemaphore );
+    Semaphore_Post( &stSemaphore );
 
     EXPECT_EQUALS(ucTestVal, 0x21);
 
     ucTestVal = 0x32;
-    Semaphore_Post( &clSemaphore );
+    Semaphore_Post( &stSemaphore );
 
     EXPECT_EQUALS(ucTestVal, 0x23);
 
     ucTestVal = 0x45;    
-    Semaphore_Post( &clSemaphore );
+    Semaphore_Post( &stSemaphore );
 
     EXPECT_EQUALS(ucTestVal, 0x54);
 
-    Thread_Stop( &clTestThread1 );
-    Thread_Exit( &clTestThread1 );
+    Thread_Stop( &stTestThread1 );
+    Thread_Exit( &stTestThread1 );
 
-    Semaphore_Init( &clSemaphore, 0, 1 );
+    Semaphore_Init( &stSemaphore, 0, 1 );
 
 }
 TEST_END
@@ -135,26 +135,26 @@ void TimedSemaphoreThread_Long( Semaphore_t *pstSem_ )
 //void UT_TimedSemaphoreTest(void)
 TEST(ut_sanity_timed_sem)
 {
-    Semaphore_t clSem;
+    Semaphore_t stSem;
 
     Thread_SetPriority( Scheduler_GetCurrentThread(), 3);
 
-    Semaphore_Init( &clSem, 0,1);
+    Semaphore_Init( &stSem, 0,1);
     
-    Thread_Init( &clTestThread1, aucTestStack1, TEST_STACK1_SIZE, 2, (ThreadEntry_t)TimedSemaphoreThread_Short, (void*)&clSem );
-    Thread_Start( &clTestThread1 );
+    Thread_Init( &stTestThread1, aucTestStack1, TEST_STACK1_SIZE, 2, (ThreadEntry_t)TimedSemaphoreThread_Short, (void*)&stSem );
+    Thread_Start( &stTestThread1 );
     
 // Test 1 - block on a semaphore, wait on thread that will post before expiry
 
-    EXPECT_TRUE( Semaphore_TimedPend( &clSem, 15 ) );
+    EXPECT_TRUE( Semaphore_TimedPend( &stSem, 15 ) );
     
 // Test 2 - block on a semaphore, wait on thread that will post after expiry
-    Semaphore_Init( &clSem, 0, 1 );
+    Semaphore_Init( &stSem, 0, 1 );
     
-    Thread_Init( &clTestThread1, aucTestStack1, TEST_STACK1_SIZE, 2, (ThreadEntry_t)TimedSemaphoreThread_Long, (void*)&clSem );
-    Thread_Start( &clTestThread1 );
+    Thread_Init( &stTestThread1, aucTestStack1, TEST_STACK1_SIZE, 2, (ThreadEntry_t)TimedSemaphoreThread_Long, (void*)&stSem );
+    Thread_Start( &stTestThread1 );
         
-    EXPECT_FALSE( Semaphore_TimedPend( &clSem, 15 ) );
+    EXPECT_FALSE( Semaphore_TimedPend( &stSem, 15 ) );
 
     Thread_SetPriority( Scheduler_GetCurrentThread(), 1);
 }
@@ -185,15 +185,15 @@ TEST(ut_sanity_sleep)
     
     // Create a lower-priority thread that sets the test value to a known
     // cookie.
-    Thread_Init( &clTestThread1, aucTestStack1, TEST_STACK1_SIZE, 2, (ThreadEntry_t)TestSleepThread, NULL);
-    Thread_Start( &clTestThread1 );
+    Thread_Init( &stTestThread1, aucTestStack1, TEST_STACK1_SIZE, 2, (ThreadEntry_t)TestSleepThread, NULL);
+    Thread_Start( &stTestThread1 );
     
     // Sleep, when we wake up check the test value
     Thread_Sleep(5);
 
     EXPECT_EQUALS(ucTestVal, 0xAA);
 
-    Thread_Exit( &clTestThread1 );
+    Thread_Exit( &stTestThread1 );
 
     Thread_SetPriority( Scheduler_GetCurrentThread(), 1 );
     
@@ -241,41 +241,41 @@ void TestTimedMutexThreadLong(Mutex_t *pclMutex_)
 
 //---------------------------------------------------------------------------
 // Mutex test
-//  Create a mutex and claim it.  While the mutex is owned, create a new
-//  thread at a higher priority, which tries to claim the mutex itself.
+//  Create a mutex and stst| staim it.  While the mutex is owned, create a new
+//  thread at a higher priority, which tries to stst| staim the mutex itself.
 //  Use a global variable to verify that the threads do not proceed outside
 //  of the control.
 //---------------------------------------------------------------------------
 //void UT_MutexTest(void)
 TEST(ut_sanity_mutex)
 {
-    Mutex_Init( &clMutex );
+    Mutex_Init( &stMutex );
 
     ucTestVal = 0x10;
-    Mutex_Claim( &clMutex );
+    Mutex_Claim( &stMutex );
 
-    Thread_Init( &clTestThread1, aucTestStack1, TEST_STACK1_SIZE, 2, (ThreadEntry_t)TestMutexThread, (void*)&clMutex );
-    Thread_Start( &clTestThread1 );
+    Thread_Init( &stTestThread1, aucTestStack1, TEST_STACK1_SIZE, 2, (ThreadEntry_t)TestMutexThread, (void*)&stMutex );
+    Thread_Start( &stTestThread1 );
     
     ucTestVal = 0xDC;
     
-    Mutex_Release( &clMutex );
+    Mutex_Release( &stMutex );
 
     EXPECT_EQUALS(ucTestVal, 0xAC);
 
-    Mutex_Init( &clMutex );
+    Mutex_Init( &stMutex );
     
-    Thread_Init( &clTestThread1, aucTestStack1, TEST_STACK1_SIZE, 2, (ThreadEntry_t)TestTimedMutexThreadShort, (void*)&clMutex );
-    Thread_Start( &clTestThread1 );
+    Thread_Init( &stTestThread1, aucTestStack1, TEST_STACK1_SIZE, 2, (ThreadEntry_t)TestTimedMutexThreadShort, (void*)&stMutex );
+    Thread_Start( &stTestThread1 );
     
-    EXPECT_TRUE( Mutex_TimedClaim( &clMutex, 15 ) );
+    EXPECT_TRUE( Mutex_TimedClaim( &stMutex, 15 ) );
 
-    Mutex_Init( &clMutex );
+    Mutex_Init( &stMutex );
 
-    Thread_Init( &clTestThread1, aucTestStack1, TEST_STACK1_SIZE, 2, (ThreadEntry_t)TestTimedMutexThreadLong, (void*)&clMutex );
-    Thread_Start( &clTestThread1 );
+    Thread_Init( &stTestThread1, aucTestStack1, TEST_STACK1_SIZE, 2, (ThreadEntry_t)TestTimedMutexThreadLong, (void*)&stMutex );
+    Thread_Start( &stTestThread1 );
     
-    EXPECT_FALSE( Mutex_TimedClaim( &clMutex, 15 ) );
+    EXPECT_FALSE( Mutex_TimedClaim( &stMutex, 15 ) );
 }
 TEST_END
 
@@ -300,10 +300,10 @@ TEST(ut_sanity_timed_msg)
 {
     Message_t *pclMsg;
 
-    Thread_Init( &clTestThread1, aucTestStack1, TEST_STACK1_SIZE, 2, (ThreadEntry_t)TimedMessageThread, (void*)&clMsgQ1);
-    Thread_Start( &clTestThread1 );
+    Thread_Init( &stTestThread1, aucTestStack1, TEST_STACK1_SIZE, 2, (ThreadEntry_t)TimedMessageThread, (void*)&stMsgQ1);
+    Thread_Start( &stTestThread1 );
     
-    pclMsg = MessageQueue_TimedReceive( &clMsgQ1, 15 );
+    pclMsg = MessageQueue_TimedReceive( &stMsgQ1, 15 );
     
     if (!pclMsg)
     {
@@ -315,7 +315,7 @@ TEST(ut_sanity_timed_msg)
         GlobalMessagePool_Push(pclMsg);
     }
 
-    pclMsg = MessageQueue_TimedReceive( &clMsgQ1, 10 );
+    pclMsg = MessageQueue_TimedReceive( &stMsgQ1, 10 );
     
     if (pclMsg)
     {
@@ -335,7 +335,7 @@ void TestMessageTest(void *pvArg)
     Message_t *pclMesg;
     bool bPass = true;
 
-    pclMesg = MessageQueue_Receive( &clMsgQ2 );
+    pclMesg = MessageQueue_Receive( &stMsgQ2 );
 
     if (Message_GetCode( pclMesg ) != 0x11)
     {
@@ -348,9 +348,9 @@ void TestMessageTest(void *pvArg)
     
     Message_SetCode( pclMesg, 0x22 );
 
-    MessageQueue_Send( &clMsgQ1, pclMesg );
+    MessageQueue_Send( &stMsgQ1, pclMesg );
     
-    pclMesg = MessageQueue_Receive( &clMsgQ2 );
+    pclMesg = MessageQueue_Receive( &stMsgQ2 );
     if(Message_GetCode( pclMesg ) != 0xAA)
     {
         bPass = false;
@@ -358,7 +358,7 @@ void TestMessageTest(void *pvArg)
 
     GlobalMessagePool_Push(pclMesg);
     
-    pclMesg = MessageQueue_Receive( &clMsgQ2 );
+    pclMesg = MessageQueue_Receive( &stMsgQ2 );
     if(Message_GetCode( pclMesg ) != 0xBB)
     {
         bPass = false;
@@ -366,7 +366,7 @@ void TestMessageTest(void *pvArg)
 
     GlobalMessagePool_Push(pclMesg);
 
-    pclMesg = MessageQueue_Receive( &clMsgQ2 );
+    pclMesg = MessageQueue_Receive( &stMsgQ2 );
     if(Message_GetCode( pclMesg ) != 0xCC)
     {
         bPass = false;
@@ -383,7 +383,7 @@ void TestMessageTest(void *pvArg)
     {
         Message_SetCode( pclMesg, 0xFF );
     }
-    MessageQueue_Send( &clMsgQ1, pclMesg );
+    MessageQueue_Send( &stMsgQ1, pclMesg );
 
     pclMesg = GlobalMessagePool_Pop();
     if (bPass)
@@ -394,7 +394,7 @@ void TestMessageTest(void *pvArg)
     {
         Message_SetCode( pclMesg, 0x00 );
     }
-    MessageQueue_Send( &clMsgQ1, pclMesg );
+    MessageQueue_Send( &stMsgQ1, pclMesg );
 
     pclMesg = GlobalMessagePool_Pop();
     if (bPass)
@@ -405,7 +405,7 @@ void TestMessageTest(void *pvArg)
     {
         Message_SetCode( pclMesg, 0x11);
     }
-    MessageQueue_Send( &clMsgQ1, pclMesg );
+    MessageQueue_Send( &stMsgQ1, pclMesg );
 
     Thread_Exit( Scheduler_GetCurrentThread() );
 }
@@ -419,23 +419,23 @@ void TestMessageTest(void *pvArg)
 //void UT_MessageTest(void)
 TEST(ut_sanity_msg)
 {
-    MessageQueue_Init( &clMsgQ1 );
-    MessageQueue_Init( &clMsgQ2 );
+    MessageQueue_Init( &stMsgQ1 );
+    MessageQueue_Init( &stMsgQ2 );
 
     Message_t *pclMsg;
 
     pclMsg = GlobalMessagePool_Pop();
 
-    Thread_Init( &clTestThread1, aucTestStack1, TEST_STACK1_SIZE, 2, (ThreadEntry_t)TestMessageTest, NULL);
-    Thread_Start( &clTestThread1 );
+    Thread_Init( &stTestThread1, aucTestStack1, TEST_STACK1_SIZE, 2, (ThreadEntry_t)TestMessageTest, NULL);
+    Thread_Start( &stTestThread1 );
     Thread_Yield();
     
     Message_SetCode( pclMsg, 0x11 );
     Message_SetData( pclMsg, NULL );
 
-    MessageQueue_Send( &clMsgQ2, pclMsg );
+    MessageQueue_Send( &stMsgQ2, pclMsg );
 
-    pclMsg = MessageQueue_Receive( &clMsgQ1 );
+    pclMsg = MessageQueue_Receive( &stMsgQ1 );
     
     EXPECT_EQUALS(Message_GetCode( pclMsg ), 0x22);
 
@@ -443,27 +443,27 @@ TEST(ut_sanity_msg)
 
     pclMsg = GlobalMessagePool_Pop();
     Message_SetCode( pclMsg, 0xAA);
-    MessageQueue_Send( &clMsgQ2, pclMsg );
+    MessageQueue_Send( &stMsgQ2, pclMsg );
 
     pclMsg = GlobalMessagePool_Pop();
     Message_SetCode( pclMsg, 0xBB);
-    MessageQueue_Send( &clMsgQ2, pclMsg );
+    MessageQueue_Send( &stMsgQ2, pclMsg );
 
     pclMsg = GlobalMessagePool_Pop();
     Message_SetCode( pclMsg, 0xCC);
-    MessageQueue_Send( &clMsgQ2, pclMsg );
+    MessageQueue_Send( &stMsgQ2, pclMsg );
 
-    pclMsg = MessageQueue_Receive( &clMsgQ1 );
+    pclMsg = MessageQueue_Receive( &stMsgQ1 );
     EXPECT_EQUALS(Message_GetCode( pclMsg ), 0xDD);
 
     GlobalMessagePool_Push(pclMsg);
 
-    pclMsg = MessageQueue_Receive( &clMsgQ1 );
+    pclMsg = MessageQueue_Receive( &stMsgQ1 );
     EXPECT_EQUALS(Message_GetCode( pclMsg ), 0xEE);
 
     GlobalMessagePool_Push(pclMsg);
     
-    pclMsg = MessageQueue_Receive( &clMsgQ1 );
+    pclMsg = MessageQueue_Receive( &stMsgQ1 );
     EXPECT_EQUALS(Message_GetCode( pclMsg ), 0xFF);
 
     GlobalMessagePool_Push(pclMsg);
@@ -483,7 +483,7 @@ void TestRRThread(volatile K_ULONG *pulCounter_)
 // Round-Robin Thread
 //  Create 3 threads in the same priority group (lower than our thread), and
 //  set their quantums to different values.  Verify that the ratios of their
-//  "work cycles" are close to equivalent.
+//  "work cycles" are stst| stose to equivalent.
 //---------------------------------------------------------------------------
 
 //void UT_RoundRobinTest(void)
@@ -496,13 +496,13 @@ TEST(ut_sanity_rr)
 
     Thread_SetPriority( Scheduler_GetCurrentThread(), 3);
 
-    Thread_Init( &clTestThread1, aucTestStack1, TEST_STACK1_SIZE, 2, (ThreadEntry_t)TestRRThread, (void*)&ulCounter1 );
-    Thread_Init( &clTestThread2, aucTestStack2, TEST_STACK2_SIZE, 2, (ThreadEntry_t)TestRRThread, (void*)&ulCounter2 );
-    Thread_Init( &clTestThread3, aucTestStack3, TEST_STACK3_SIZE, 2, (ThreadEntry_t)TestRRThread, (void*)&ulCounter3 );
+    Thread_Init( &stTestThread1, aucTestStack1, TEST_STACK1_SIZE, 2, (ThreadEntry_t)TestRRThread, (void*)&ulCounter1 );
+    Thread_Init( &stTestThread2, aucTestStack2, TEST_STACK2_SIZE, 2, (ThreadEntry_t)TestRRThread, (void*)&ulCounter2 );
+    Thread_Init( &stTestThread3, aucTestStack3, TEST_STACK3_SIZE, 2, (ThreadEntry_t)TestRRThread, (void*)&ulCounter3 );
     
-    Thread_Start( &clTestThread1 );
-    Thread_Start( &clTestThread2 );
-    Thread_Start( &clTestThread3 );
+    Thread_Start( &stTestThread1 );
+    Thread_Start( &stTestThread2 );
+    Thread_Start( &stTestThread3 );
 
     // Sleep for a while to let the other threads execute
     Thread_Sleep(120);  // Must be modal to the worker thread quantums
@@ -531,9 +531,9 @@ TEST(ut_sanity_rr)
     // Give or take...
     EXPECT_FALSE(ulDelta > ulCounter1/2);
 
-    Thread_Exit( &clTestThread1 );
-    Thread_Exit( &clTestThread2 );
-    Thread_Exit( &clTestThread3 );
+    Thread_Exit( &stTestThread1 );
+    Thread_Exit( &stTestThread2 );
+    Thread_Exit( &stTestThread3 );
 
     Thread_SetPriority( Scheduler_GetCurrentThread(), 1 );
 }
@@ -550,17 +550,17 @@ TEST(ut_sanity_quantum)
 
     Thread_SetPriority( Scheduler_GetCurrentThread(), 3);
 
-    Thread_Init( &clTestThread1, aucTestStack1, TEST_STACK1_SIZE, 2, (ThreadEntry_t)TestRRThread, (void*)&ulCounter1 );
-    Thread_Init( &clTestThread2, aucTestStack2, TEST_STACK2_SIZE, 2, (ThreadEntry_t)TestRRThread, (void*)&ulCounter2 );
-    Thread_Init( &clTestThread3, aucTestStack3, TEST_STACK3_SIZE, 2, (ThreadEntry_t)TestRRThread, (void*)&ulCounter3 );
+    Thread_Init( &stTestThread1, aucTestStack1, TEST_STACK1_SIZE, 2, (ThreadEntry_t)TestRRThread, (void*)&ulCounter1 );
+    Thread_Init( &stTestThread2, aucTestStack2, TEST_STACK2_SIZE, 2, (ThreadEntry_t)TestRRThread, (void*)&ulCounter2 );
+    Thread_Init( &stTestThread3, aucTestStack3, TEST_STACK3_SIZE, 2, (ThreadEntry_t)TestRRThread, (void*)&ulCounter3 );
     
-    Thread_SetQuantum( &clTestThread1, 10 );
-    Thread_SetQuantum( &clTestThread2, 20);
-    Thread_SetQuantum( &clTestThread3, 30);
+    Thread_SetQuantum( &stTestThread1, 10 );
+    Thread_SetQuantum( &stTestThread2, 20);
+    Thread_SetQuantum( &stTestThread3, 30);
     
-    Thread_Start( &clTestThread1 );
-    Thread_Start( &clTestThread2 );
-    Thread_Start( &clTestThread3 );
+    Thread_Start( &stTestThread1 );
+    Thread_Start( &stTestThread2 );
+    Thread_Start( &stTestThread3 );
     
     // Sleep for a while to let the other threads execute
     Thread_Sleep(180);  // Must be modal to the worker thread quantums
@@ -593,9 +593,9 @@ TEST(ut_sanity_quantum)
     // Give or take...
     EXPECT_FALSE(ulDelta > ulCounter1/2);
 
-    Thread_Exit( &clTestThread1 );
-    Thread_Exit( &clTestThread2 );
-    Thread_Exit( &clTestThread3 );
+    Thread_Exit( &stTestThread1 );
+    Thread_Exit( &stTestThread2 );
+    Thread_Exit( &stTestThread3 );
 
     Thread_SetPriority( Scheduler_GetCurrentThread(), 1 );
 }
@@ -609,26 +609,26 @@ void TimerTestCallback(Thread_t *pclOwner_, void *pvData_)
 //void UT_TimerTest(void)
 TEST(ut_sanity_timer)
 {
-    Timer_t clTimer;
+    Timer_t stTimer;
 
     ucTestVal = 0;
 
-    Timer_Init( &clTimer );
-    Timer_Start( &clTimer, 1, 2, TimerTestCallback, NULL );
+    Timer_Init( &stTimer );
+    Timer_Start( &stTimer, 1, 2, TimerTestCallback, NULL );
 
     Thread_Sleep(3);
     EXPECT_EQUALS(ucTestVal, 1);
 
     ucTestVal = 0;
-    Timer_Stop( &clTimer );
+    Timer_Stop( &stTimer );
 
-    Timer_Start( &clTimer, 1, 1, TimerTestCallback, NULL);
+    Timer_Start( &stTimer, 1, 1, TimerTestCallback, NULL);
     
     Thread_Sleep(10);
     
     EXPECT_GTE(ucTestVal, 9);
 
-    Timer_Stop( &clTimer );
+    Timer_Stop( &stTimer );
 }
 TEST_END
 

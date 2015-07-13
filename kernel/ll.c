@@ -29,33 +29,6 @@ See license.txt for more information
 #endif
 #define __FILE_ID__ 	LL_C        //!< File ID used in kernel trace calls
 
-
-//---------------------------------------------------------------------------
-void LinkList_Init( LinkList_t *pstList_ )
-{
-	pstList_->m_pstHead = NULL; 
-	pstList_->m_pstTail = NULL; 
-}
-
-//---------------------------------------------------------------------------
-LinkListNode_t *LinkList_GetHead( LinkList_t *pstList_ ) 
-{ 
-	return pstList_->m_pstHead; 
-}
-
-//---------------------------------------------------------------------------
-LinkListNode_t *LinkList_GetTail( LinkList_t *pstList_ ) 
-{ 
-	return pstList_->m_pstTail; 
-}
-
-//---------------------------------------------------------------------------
-void DoubleLinkList_Init( DoubleLinkList_t *pstList_ ) 
-{ 
-	pstList_->m_pstHead = NULL; 
-	pstList_->m_pstTail = NULL; 
-}
-
 //---------------------------------------------------------------------------
 void DoubleLinkList_Add( DoubleLinkList_t *pstList_, LinkListNode_t *node_)
 {
@@ -117,12 +90,7 @@ void DoubleLinkList_Remove( DoubleLinkList_t *pstList_, LinkListNode_t *node_)
     LinkListNode_Clear( node_ );
 }
 
-//---------------------------------------------------------------------------
-void CircularLinkList_Init( CircularLinkList_t *pstList_ ) 
-{ 
-	pstList_->m_pstHead = NULL; 
-	pstList_->m_pstTail = NULL; 
-}
+
 
 //---------------------------------------------------------------------------
 void CircularLinkList_Add( CircularLinkList_t *pstList_, LinkListNode_t *node_)

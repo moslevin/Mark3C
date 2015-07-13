@@ -58,9 +58,9 @@ See license.txt for more information
 #define NUM_PRIORITIES              (8)     //!< Defines the maximum number of thread priorities supported in the scheduler
 //---------------------------------------------------------------------------
 
+//---------------------------------------------------------------------------
 extern volatile Thread_t *g_pstNext;
 extern Thread_t *g_pstCurrent;
-//---------------------------------------------------------------------------
 extern K_BOOL m_bEnabled;           //! Scheduler's state - enabled or disabled
 
 //---------------------------------------------------------------------------

@@ -15,7 +15,7 @@ See license.txt for more information
 
     \file   kernel.h    
 
-    \brief  Kernel initialization and startup class
+    \brief  Kernel initialization and startup object
     
     The Kernel namespace provides functions related to initializing and 
     starting up the kernel.

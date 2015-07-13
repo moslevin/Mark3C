@@ -15,7 +15,7 @@ See license.txt for more information
 
     \file   mutex.h    
 
-    \brief  Mutual exclusion class declaration
+    \brief  Mutual exclusion object declaration
     
     Resource locks are implemented using mutual exclusion semaphores (Mutex_t).
     Protected blocks can be placed around any resource that may only be accessed
