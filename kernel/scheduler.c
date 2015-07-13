@@ -35,11 +35,11 @@ See license.txt for more information
 //---------------------------------------------------------------------------
 volatile Thread_t *g_pstNext;         //!< Pointer to the currently-chosen next-running thread
 Thread_t *g_pstCurrent;               //!< Pointer to the currently-running thread
+K_BOOL m_bEnabled;                    //! Scheduler's state - enabled or disabled
 
 //---------------------------------------------------------------------------
 static ThreadList_t m_clStopList;     //! ThreadList_t for all stopped threads
 static ThreadList_t m_aclPriorities[NUM_PRIORITIES];    //! ThreadLists for all threads at all priorities
-static K_BOOL m_bEnabled;           //! Scheduler's state - enabled or disabled
 static K_BOOL m_bQueuedSchedule;    //! Variable representing whether or not there's a queued scheduler operation
 static K_UCHAR m_ucPriFlag;         //! Bitmap flag for each
 
@@ -137,15 +137,15 @@ K_BOOL Scheduler_SetScheduler(K_BOOL bEnable_)
 }
 
 //---------------------------------------------------------------------------
-Thread_t *Scheduler_GetCurrentThread()
+/*!
+ * \brief Scheduler_QueueScheduler
+ *
+ * Tell the kernel to perform a scheduling operation as soon as the
+ * scheduler is re-enabled.
+ */
+void Scheduler_QueueScheduler()
 {
-    return g_pstCurrent;
-}
-
-//---------------------------------------------------------------------------
-volatile Thread_t *Scheduler_GetNextThread()
-{
-    return g_pstNext;
+    m_bQueuedSchedule = true;
 }
 
 //---------------------------------------------------------------------------
@@ -155,19 +155,16 @@ ThreadList_t *Scheduler_GetThreadList( K_UCHAR ucPriority_ )
 }
 
 //---------------------------------------------------------------------------
+/*!
+    \brief Scheduler_GetStopList
+
+    Return the pointer to the list of threads that are in the
+    scheduler's stopped state.
+
+    \return Pointer to the ThreadList_t containing the stopped threads
+*/
 ThreadList_t *Scheduler_GetStopList()
 {
     return &m_clStopList;
 }
 
-//---------------------------------------------------------------------------
-K_UCHAR Scheduler_IsEnabled( void )
-{
-    return m_bEnabled;
-}
-
-//---------------------------------------------------------------------------
-void Scheduler_QueueScheduler( void )
-{
-    m_bQueuedSchedule = true;
-}

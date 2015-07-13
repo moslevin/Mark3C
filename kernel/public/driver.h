@@ -269,6 +269,9 @@ void DriverList_Init( void );
 //---------------------------------------------------------------------------
 Driver_t *DriverList_FindByPath( const K_CHAR *m_pcPath );
 
+//---------------------------------------------------------------------------
+void DriverList_Add( Driver_t *pstDriver_ );
+
 #ifdef __cplusplus
     }
 #endif

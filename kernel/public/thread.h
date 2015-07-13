@@ -48,6 +48,11 @@ See license.txt for more information
     extern "C" {
 #endif
 
+#ifndef INLINE
+# define INLINE extern inline
+#endif
+
+
 //---------------------------------------------------------------------------
 /*!
  * \brief Thread_Init
@@ -110,7 +115,7 @@ void Thread_Stop( Thread_t *pstThread_ );
  * \param pstThread_ Pointer to the thread to modify
  * \param szName_ Char string containing the thread name
  */
-void Thread_SetName( Thread_t *pstThread_, const K_CHAR *szName_);
+#define Thread_SetName( pstThread_, szName_) ( ((Thread_t*)pstThread_)->m_szName = szName_ )
 
 //---------------------------------------------------------------------------
 /*!
@@ -121,7 +126,7 @@ void Thread_SetName( Thread_t *pstThread_, const K_CHAR *szName_);
  * \param pstThread_ Pointer to the thread to inspect
  * \return Pointer to the name of the thread.  If this is not set, will be NULL.
  */
-const K_CHAR* Thread_GetName( Thread_t *pstThread_ );
+#define Thread_GetName( pstThread_ ) ( ((Thread_t*)pstThread_)->m_szName )
 #endif
 
 //---------------------------------------------------------------------------
@@ -134,7 +139,7 @@ const K_CHAR* Thread_GetName( Thread_t *pstThread_ );
  * \param pstThread_ Pointer to the thread to access/modify
  * \return Pointer to the Thread_t's owner list
  */
-ThreadList_t *Thread_GetOwner( Thread_t *pstThread_ );
+#define Thread_GetOwner( pstThread_ ) ( ((Thread_t*)pstThread_)->m_pstOwner )
 
 //---------------------------------------------------------------------------
 /*!
@@ -145,7 +150,7 @@ ThreadList_t *Thread_GetOwner( Thread_t *pstThread_ );
  * \param pstThread_ Pointer to the thread to access/modify
  * \return Pointer to the thread's current list
  */
-ThreadList_t *Thread_GetCurrent( Thread_t *pstThread_ );
+#define Thread_GetCurrent( pstThread_ ) ( ((Thread_t*)pstThread_)->m_pstCurrent )
 
 //---------------------------------------------------------------------------
 /*!
@@ -156,7 +161,7 @@ ThreadList_t *Thread_GetCurrent( Thread_t *pstThread_ );
  * \param pstThread_ Pointer to the thread to access/modify
  * \return Priority of the current thread
  */
-K_UCHAR Thread_GetPriority( Thread_t *pstThread_ );
+#define Thread_GetPriority( pstThread_ )  (((Thread_t*)pstThread_)->m_ucPriority)
 
 //---------------------------------------------------------------------------
 /*!
@@ -167,7 +172,7 @@ K_UCHAR Thread_GetPriority( Thread_t *pstThread_ );
  * \param pstThread_ Pointer to the thread to access/modify
  * \return Priority of the current thread
  */
-K_UCHAR Thread_GetCurPriority( Thread_t *pstThread_ );
+#define Thread_GetCurPriority( pstThread_ ) (((Thread_t*)pstThread_)->m_ucCurPriority)
 
 #if KERNEL_USE_QUANTUM
 //---------------------------------------------------------------------------
@@ -179,7 +184,7 @@ K_UCHAR Thread_GetCurPriority( Thread_t *pstThread_ );
  * \param pstThread_ Pointer to the thread to access/modify
  * \param usQuantum_ Thread's execution quantum (in milliseconds)
  */
-void Thread_SetQuantum( Thread_t *pstThread_, K_USHORT usQuantum_ );
+#define Thread_SetQuantum( pstThread_, usQuantum_ ) ( ((Thread_t*)pstThread_)->m_usQuantum = usQuantum_ )
 
 //---------------------------------------------------------------------------
 /*!
@@ -190,7 +195,7 @@ void Thread_SetQuantum( Thread_t *pstThread_, K_USHORT usQuantum_ );
  * \param pstThread_ Pointer to the thread to access/modify
  * \return  The thread's round-robin timeslice quantum
  */
-K_USHORT Thread_GetQuantum( Thread_t *pstThread_ );
+#define Thread_GetQuantum( pstThread_ ) ( ((Thread_t*)pstThread_)->m_usQuantum )
 #endif
 
 //---------------------------------------------------------------------------
@@ -199,7 +204,7 @@ K_USHORT Thread_GetQuantum( Thread_t *pstThread_ );
  * \param pstThread_ Pointer to the thread to access/modify
  * \param pstNewList_ Pointer to the threadlist to apply thread ownership
  */
-void Thread_SetCurrent( Thread_t *pstThread_, ThreadList_t *pstNewList_ );
+#define Thread_SetCurrent( pstThread_, pstNewList_ ) ( ((Thread_t*)pstThread_)->m_pstCurrent = pstNewList_)
 
 //---------------------------------------------------------------------------
 /*!
@@ -210,7 +215,7 @@ void Thread_SetCurrent( Thread_t *pstThread_, ThreadList_t *pstNewList_ );
  * \param pstThread_ Pointer to the thread to access/modify
  * \param pstNewList_ Pointer to the threadlist to apply thread ownership
  */
-void Thread_SetOwner( Thread_t *pstThread_, ThreadList_t *pstNewList_ );
+#define Thread_SetOwner( pstThread_, pstNewList_ ) ( ((Thread_t*)pstThread_)->m_pstOwner = pstNewList_ )
 
 //---------------------------------------------------------------------------
 /*!
@@ -302,7 +307,7 @@ void Thread_Yield( void );
  * \param pstThread_ Pointer to the thread to access/modify
  * \param ucID_ 8-bit Thread_t ID, set by the user
  */
-void Thread_SetID( Thread_t *pstThread_, K_UCHAR ucID_ );
+#define Thread_SetID( pstThread_, ucID_ ) (	((Thread_t*)pstThread_)->m_ucThreadID = ucID_ )
 
 //---------------------------------------------------------------------------
 /*!
@@ -313,7 +318,7 @@ void Thread_SetID( Thread_t *pstThread_, K_UCHAR ucID_ );
  * \param pstThread_ Pointer to the thread to access/modify
  * \return Thread_t's 8-bit ID, set by the user
  */
-K_UCHAR Thread_GetID( Thread_t *pstThread_ );
+#define Thread_GetID( pstThread_ ) ( ((Thread_t*)pstThread_)->m_ucThreadID )
 
 //---------------------------------------------------------------------------
 /*!
@@ -340,7 +345,7 @@ K_USHORT Thread_GetStackSlack( Thread_t *pstThread_ );
  * \param pstThread_ Pointer to the thread to access/modify
  * \return A copy of the thread's event flag mask
  */
-K_USHORT Thread_GetEventFlagMask( Thread_t *pstThread_ );
+#define Thread_GetEventFlagMask( pstThread_ ) (((Thread_t*)pstThread_)->m_usFlagMask)
 
 //---------------------------------------------------------------------------
 /*!
@@ -348,7 +353,7 @@ K_USHORT Thread_GetEventFlagMask( Thread_t *pstThread_ );
  * \param pstThread_ Pointer to the thread to access/modify
  * \param usMask_ Binary mask value to set for this thread
  */
-void Thread_SetEventFlagMask( Thread_t *pstThread_, K_USHORT usMask_ );
+#define Thread_SetEventFlagMask( pstThread_, usMask_ ) (((Thread_t*)pstThread_)->m_usFlagMask = usMask_)
 
 //---------------------------------------------------------------------------
 /*!
@@ -356,14 +361,14 @@ void Thread_SetEventFlagMask( Thread_t *pstThread_, K_USHORT usMask_ );
  * \param eMode_ Event flag operation mode, defines the logical operator
  *               to apply to the event flag.
  */
-void Thread_SetEventFlagMode( Thread_t *pstThread_, EventFlagOperation_t eMode_ );
+#define Thread_SetEventFlagMode( pstThread_, eMode_ ) (((Thread_t*)pstThread_)->m_eFlagMode = eMode_ )
 
 //---------------------------------------------------------------------------
 /*!
  * \brief Thread_GetEventFlagMode Returns the thread's event flag's operating mode
  * \return The thread's event flag mode.
  */
-EventFlagOperation_t Thread_GetEventFlagMode( Thread_t *pstThread_ );
+#define Thread_GetEventFlagMode( pstThread_ ) ( ((Thread_t*)pstThread_)->m_eFlagMode )
 #endif
 
 #if KERNEL_USE_TIMEOUTS || KERNEL_USE_SLEEP
@@ -373,7 +378,7 @@ EventFlagOperation_t Thread_GetEventFlagMode( Thread_t *pstThread_ );
  * \param pstThread_ Pointer to the thread to access/modify
  * \return Return a pointer to the thread's timer object
  */
-Timer_t *Thread_GetTimer( Thread_t *pstThread_ );
+#define Thread_GetTimer( pstThread_ ) ( &((Thread_t*)pstThread_)->m_clTimer )
 #endif
 #if KERNEL_USE_TIMEOUTS
 
@@ -386,7 +391,7 @@ Timer_t *Thread_GetTimer( Thread_t *pstThread_ );
  * \param pstThread_ Pointer to the thread to access/modify
  * \param bExpired_ true - call expired, false - call did not expire
  */
-void Thread_SetExpired(Thread_t *pstThread_, K_BOOL bExpired_ );
+#define Thread_SetExpired( pstThread_, bExpired_ ) ( ((Thread_t*)pstThread_)->m_bExpired = bExpired_ )
 
 //---------------------------------------------------------------------------
 /*!
@@ -397,7 +402,7 @@ void Thread_SetExpired(Thread_t *pstThread_, K_BOOL bExpired_ );
  * \param pstThread_ Pointer to the thread to access/modify
  * \return true - call expired, false - call did not expire
  */
-K_BOOL Thread_GetExpired( Thread_t *pstThread_ );
+#define Thread_GetExpired( pstThread_ )	( ((Thread_t*)pstThread_)->m_bExpired )
 #endif
 
 #if KERNEL_USE_IDLE_FUNC
@@ -421,7 +426,7 @@ void Thread_InitIdle( Thread_t *pstThread_ );
  * \param pstThread_ Pointer to the thread to access/modify
  * \return ThreadState_t representing the thread's current state
  */
-ThreadState_t Thread_GetState( Thread_t *pstThread_ );
+#define Thread_GetState( pstThread_ ) ( ((Thread_t*)pstThread_)->m_eState )
 
 //---------------------------------------------------------------------------
 /*!
@@ -431,7 +436,7 @@ ThreadState_t Thread_GetState( Thread_t *pstThread_ );
  * \param pstThread_ Pointer to the thread to access/modify
  * \param eState_ New thread state to set.
  */
-void Thread_SetState( Thread_t *pstThread_, ThreadState_t eState_ );
+#define Thread_SetState( pstThread_, eState_ ) ( ((Thread_t*)pstThread_)->m_eState = eState_ )
 
 //---------------------------------------------------------------------------
 /*!

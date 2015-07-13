@@ -36,7 +36,7 @@ See license.txt for more information
     *
     * \param pstOwner_ Pointer to the owner thread to unblock.
     */
-void EventFlag_WakeMe( EventFlag_t *pstFlag_, Thread_t *pstOwner_);
+static void EventFlag_WakeMe( EventFlag_t *pstFlag_, Thread_t *pstOwner_);
 
 /*!
     * \brief Wait_i

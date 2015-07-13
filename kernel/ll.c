@@ -29,24 +29,6 @@ See license.txt for more information
 #endif
 #define __FILE_ID__ 	LL_C        //!< File ID used in kernel trace calls
 
-//---------------------------------------------------------------------------
-void LinkListNode_Clear( LinkListNode_t *pstNode_  )
-{
-    pstNode_->next = NULL;
-    pstNode_->prev = NULL;
-}
-
-//---------------------------------------------------------------------------
-LinkListNode_t *LinkListNode_GetNext( LinkListNode_t *pstNode_ )
-{
-	return pstNode_->next;
-}
-
-//---------------------------------------------------------------------------
-LinkListNode_t *LinkListNode_GetPrev( LinkListNode_t *pstNode_ )
-{
-	return pstNode_->prev;
-}
 
 //---------------------------------------------------------------------------
 void LinkList_Init( LinkList_t *pstList_ )

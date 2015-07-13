@@ -95,6 +95,12 @@ void DriverList_Init( void )
 }
 
 //---------------------------------------------------------------------------
+void DriverList_Add( Driver_t *pstDriver_ )
+{
+    DoubleLinkList_Add( (DoubleLinkList_t*)&m_clDriverList, (LinkListNode_t*)pstDriver_ );
+}
+
+//---------------------------------------------------------------------------
 Driver_t *DriverList_FindByPath( const K_CHAR *m_pcPath )
 {
 	KERNEL_ASSERT( m_pcPath );

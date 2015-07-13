@@ -71,7 +71,11 @@ typedef struct _LinkListNode
 
     Initialize the linked list node, clearing its next and previous node.
 */
-void LinkListNode_Clear( LinkListNode_t *pstNode_ );
+#define LinkListNode_Clear( pstNode_  ) \
+do { \
+    ((LinkListNode_t *)pstNode_)->next = NULL; \
+    ((LinkListNode_t *)pstNode_)->prev = NULL; \
+} while (0);
 
 //---------------------------------------------------------------------------
 /*!
@@ -81,7 +85,8 @@ void LinkListNode_Clear( LinkListNode_t *pstNode_ );
 
     \return a pointer to the next node in the list.
 */
-LinkListNode_t *LinkListNode_GetNext( LinkListNode_t *pstNode_ );
+#define LinkListNode_GetNext( pstNode_ ) ( ((LinkListNode_t *)pstNode_)->next )
+
 
 //---------------------------------------------------------------------------
 /*!
@@ -91,7 +96,7 @@ LinkListNode_t *LinkListNode_GetNext( LinkListNode_t *pstNode_ );
 
     \return a pointer to the previous node in the list.
 */
-LinkListNode_t *LinkListNode_GetPrev( LinkListNode_t *pstNode_ );
+#define LinkListNode_GetPrev( pstNode_ ) ( ((LinkListNode_t *)pstNode_)->prev )
 
 
 //---------------------------------------------------------------------------

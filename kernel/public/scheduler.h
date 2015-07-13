@@ -55,11 +55,13 @@ See license.txt for more information
     extern "C" {
 #endif
 
+#define NUM_PRIORITIES              (8)     //!< Defines the maximum number of thread priorities supported in the scheduler
+//---------------------------------------------------------------------------
+
 extern volatile Thread_t *g_pstNext;
 extern Thread_t *g_pstCurrent;
-
 //---------------------------------------------------------------------------
-#define NUM_PRIORITIES              (8)     //!< Defines the maximum number of thread priorities supported in the scheduler
+extern K_BOOL m_bEnabled;           //! Scheduler's state - enabled or disabled
 
 //---------------------------------------------------------------------------
 /*!
@@ -117,27 +119,6 @@ K_BOOL Scheduler_SetScheduler(K_BOOL bEnable_);
 
 //---------------------------------------------------------------------------
 /*!
-    \brief Scheduler_GetCurrentThread
-
-    Return the pointer to the currently-running thread.
-
-    \return Pointer to the currently-running thread
-*/
-Thread_t *Scheduler_GetCurrentThread( void );
-
-//---------------------------------------------------------------------------
-/*!
-    \brief Scheduler_GetNextThread
-
-    Return the pointer to the thread that should run next, according    
-    to the last run of the scheduler.
-
-    \return Pointer to the next-running thread
-*/
-volatile Thread_t *Scheduler_GetNextThread( void );
-
-//---------------------------------------------------------------------------
-/*!
     \brief Scheduler_GetThreadList
 
     Return the pointer to the active list of threads that are at the
@@ -151,14 +132,24 @@ ThreadList_t *Scheduler_GetThreadList( K_UCHAR ucPriority_ );
 
 //---------------------------------------------------------------------------
 /*!
-    \brief Scheduler_GetStopList
+    \brief Scheduler_GetCurrentThread
 
-    Return the pointer to the list of threads that are in the
-    scheduler's stopped state.
+    Return the pointer to the currently-running thread.
 
-    \return Pointer to the ThreadList_t containing the stopped threads
+    \return Pointer to the currently-running thread
 */
-ThreadList_t *Scheduler_GetStopList( void );
+#define Scheduler_GetCurrentThread() ( g_pstCurrent )
+
+//---------------------------------------------------------------------------
+/*!
+    \brief Scheduler_GetNextThread
+
+    Return the pointer to the thread that should run next, according
+    to the last run of the scheduler.
+
+    \return Pointer to the next-running thread
+*/
+#define Scheduler_GetNextThread() ( g_pstNext )
 
 //---------------------------------------------------------------------------
 /*!
@@ -169,17 +160,7 @@ ThreadList_t *Scheduler_GetStopList( void );
 
     \return true - scheduler enabled, false - disabled
 */
-K_UCHAR Scheduler_IsEnabled( void );
-
-//---------------------------------------------------------------------------
-/*!
- * \brief Scheduler_QueueScheduler
- *
- * Tell the kernel to perform a scheduling operation as soon as the
- * scheduler is re-enabled.
- */
-void Scheduler_QueueScheduler( void );
-
+#define Scheduler_IsEnabled() ( m_bEnabled )
 
 #ifdef __cplusplus
     }

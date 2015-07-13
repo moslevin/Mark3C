@@ -19,6 +19,8 @@ See license.txt for more information
 
 */
 
+#define INLINE
+
 #include "kerneltypes.h"
 #include "mark3cfg.h"
 
@@ -333,63 +335,6 @@ void Thread_Yield( void )
 
     CS_EXIT();
 }
-//---------------------------------------------------------------------------
-void Thread_SetID( Thread_t *pstThread_, K_UCHAR ucID_ ) 
-{ 
-	pstThread_->m_ucThreadID = ucID_; 
-}
-//---------------------------------------------------------------------------
-K_UCHAR Thread_GetID( Thread_t *pstThread_ ) 
-{ 
-	return pstThread_->m_ucThreadID; 
-}
-
-#if KERNEL_USE_THREADNAME    
-//---------------------------------------------------------------------------
-void Thread_SetName( Thread_t *pstThread_, const K_CHAR *szName_) 
-{ 
-	pstThread_->m_szName = szName_; 
-}
-//---------------------------------------------------------------------------
-const K_CHAR* Thread_GetName( Thread_t *pstThread_ ) 
-{ 
-	return pstThread_->m_szName; 
-}
-#endif
-
-//---------------------------------------------------------------------------
-ThreadList_t *Thread_GetOwner( Thread_t *pstThread_ ) 
-{ 
-	return pstThread_->m_pstOwner; 
-}
-
-//---------------------------------------------------------------------------
-ThreadList_t *Thread_GetCurrent( Thread_t *pstThread_ ) 
-{ 
-	return pstThread_->m_pstCurrent; 
-}
-//---------------------------------------------------------------------------
-void Thread_SetCurrent( Thread_t *pstThread_, ThreadList_t *pstNewList_ ) 
-{ 
-	pstThread_->m_pstCurrent = pstNewList_; 
-}
-//---------------------------------------------------------------------------
-void Thread_SetOwner( Thread_t *pstThread_, ThreadList_t *pstNewList_ ) 
-{ 
-	pstThread_->m_pstOwner = pstNewList_; 
-}
-
-//---------------------------------------------------------------------------
-K_UCHAR Thread_GetPriority( Thread_t *pstThread_ )
-{
-	return pstThread_->m_ucPriority;
-}
-
-//---------------------------------------------------------------------------
-K_UCHAR Thread_GetCurPriority( Thread_t *pstThread_ )
-{
-	return pstThread_->m_ucCurPriority;
-}
 
 //---------------------------------------------------------------------------
 void Thread_SetPriorityBase( Thread_t *pstThread_, K_UCHAR ucPriority_ )
@@ -399,7 +344,6 @@ void Thread_SetPriorityBase( Thread_t *pstThread_, K_UCHAR ucPriority_ )
 	 Thread_SetCurrent( pstThread_, Scheduler_GetThreadList(pstThread_->m_ucPriority) );
     
      ThreadList_Add( Thread_GetCurrent( pstThread_ ), pstThread_ );
-	 
 }
 
 //---------------------------------------------------------------------------
@@ -463,78 +407,6 @@ void Thread_ContextSwitchSWI( void )
         KernelSWI_Trigger();
     }
 }
-
-//---------------------------------------------------------------------------
-ThreadState_t Thread_GetState( Thread_t *pstThread_ )                
-{ 
-	return pstThread_->m_eState; 
-}
-
-//---------------------------------------------------------------------------
-void Thread_SetState( Thread_t *pstThread_, ThreadState_t eState_ )  
-{
-	pstThread_->m_eState = eState_;
-}
-
-#if KERNEL_USE_EVENTFLAG
-//---------------------------------------------------------------------------
-K_USHORT Thread_GetEventFlagMask( Thread_t *pstThread_ ) 
-{ 
-	return pstThread_->m_usFlagMask; 
-}
-
-//---------------------------------------------------------------------------
-void Thread_SetEventFlagMask( Thread_t *pstThread_, K_USHORT usMask_ ) 
-{ 
-	pstThread_->m_usFlagMask = usMask_; 
-}
-
-//---------------------------------------------------------------------------
-void Thread_SetEventFlagMode( Thread_t *pstThread_, EventFlagOperation_t eMode_ ) 
-{ 
-	pstThread_->m_eFlagMode = eMode_; 
-}
-
-//---------------------------------------------------------------------------
-EventFlagOperation_t Thread_GetEventFlagMode( Thread_t *pstThread_ ) 
-{ 
-	return pstThread_->m_eFlagMode; 
-}
-#endif
-
-#if KERNEL_USE_TIMEOUTS
-//---------------------------------------------------------------------------
-Timer_t *Thread_GetTimer( Thread_t *pstThread_ )						
-{ 
-	return &pstThread_->m_clTimer; 
-}
-
-//---------------------------------------------------------------------------
-void Thread_SetExpired( Thread_t *pstThread_, K_BOOL bExpired_ )		
-{ 
-	pstThread_->m_bExpired = bExpired_; 
-}
-
-//---------------------------------------------------------------------------
-K_BOOL Thread_GetExpired( Thread_t *pstThread_ )						
-{ 
-	return pstThread_->m_bExpired; 
-}
-#endif
-
-#if KERNEL_USE_QUANTUM    
-//---------------------------------------------------------------------------
-void Thread_SetQuantum( Thread_t *pstThread_, K_USHORT usQuantum_ ) 
-{ 
-	pstThread_->m_usQuantum = usQuantum_; 
-}
-
-//---------------------------------------------------------------------------
-K_USHORT Thread_GetQuantum( Thread_t *pstThread_ ) 
-{ 
-	return pstThread_->m_usQuantum; 
-}
-#endif
 
 #if KERNEL_USE_IDLE_FUNC
 //---------------------------------------------------------------------------
