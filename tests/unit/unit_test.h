@@ -13,7 +13,7 @@ See license.txt for more information
 ===========================================================================*/
 /*!
     \file unit_test.h
-    \brief Unit test class declarations
+    \brief Unit test object declarations
 */
 #ifndef __UNIT_TEST_H__
 #define __UNIT_TEST_H__
@@ -23,12 +23,12 @@ See license.txt for more information
 
 typedef struct
 {
-    const K_CHAR *m_szName;    //!< Name of the tests performed
-    bool m_bIsActive;          //!< Whether or not the test is active
-    K_UCHAR m_bComplete;       //!< Whether or not the test is complete
-    bool m_bStatus;            //!< Status of the last-run test
-    K_USHORT m_usIterations;   //!< Number of iterations executed
-    K_USHORT m_usPassed;       //!< Number of iterations that have passed
+    const K_CHAR *szName;    //!< Name of the tests performed
+    bool bIsActive;          //!< Whether or not the test is active
+    K_UCHAR bComplete;       //!< Whether or not the test is complete
+    bool bStatus;            //!< Status of the last-run test
+    K_USHORT usIterations;   //!< Number of iterations executed
+    K_USHORT usPassed;       //!< Number of iterations that have passed
 } UnitTest_t;
 
 //---------------------------------------------------------------------------

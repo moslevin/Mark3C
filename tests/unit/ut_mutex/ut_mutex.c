@@ -37,11 +37,11 @@ static volatile K_UCHAR ucToken;
 
 void TypicalMutexTest(void *mutex_)
 {
-    Mutex_t *pclMutex = (Mutex_t*)mutex_;
+    Mutex_t *pstMutex = (Mutex_t*)mutex_;
 
-    Mutex_Claim( pclMutex );
+    Mutex_Claim( pstMutex );
     ucToken = 0x69;
-    Mutex_Release( pclMutex );
+    Mutex_Release( pstMutex );
 
     // Exit the thread when we're done this operation.
     Thread_Exit( Scheduler_GetCurrentThread() );
@@ -86,11 +86,11 @@ TEST_END
 //===========================================================================
 void TimedMutexTest(void *mutex_)
 {
-    Mutex_t *pclMutex = (Mutex_t*)mutex_;
+    Mutex_t *pstMutex = (Mutex_t*)mutex_;
 
-    Mutex_Claim( pclMutex );
+    Mutex_Claim( pstMutex );
     Thread_Sleep(20);
-    Mutex_Release( pclMutex );
+    Mutex_Release( pstMutex );
 
     Thread_Exit( Scheduler_GetCurrentThread() );
 }
@@ -121,13 +121,13 @@ TEST_END
 //===========================================================================
 void LowPriThread(void *mutex_)
 {
-    Mutex_t *pclMutex = (Mutex_t*)mutex_;
+    Mutex_t *pstMutex = (Mutex_t*)mutex_;
 
-    Mutex_Claim( pclMutex );
+    Mutex_Claim( pstMutex );
 
     Thread_Sleep( 100 );
 
-    Mutex_Release( pclMutex );
+    Mutex_Release( pstMutex );
 
     while(1)
     {        
@@ -138,13 +138,13 @@ void LowPriThread(void *mutex_)
 //===========================================================================
 void HighPriThread(void *mutex_)
 {
-    Mutex_t *pclMutex = (Mutex_t*)mutex_;
+    Mutex_t *pstMutex = (Mutex_t*)mutex_;
 
-    Mutex_Claim( pclMutex );
+    Mutex_Claim( pstMutex );
 
     Thread_Sleep(100);
 
-    Mutex_Release( pclMutex );
+    Mutex_Release( pstMutex );
 
     while(1)
     {

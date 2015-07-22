@@ -58,7 +58,7 @@ static void ATMegaUART_SetBaud( ATMegaUART_t *pstUART_ )
     K_USHORT usPortTemp;
     
     // Calculate the baud rate from the value in the driver.    
-    usBaudTemp = (K_USHORT)(((SYSTEM_FREQ/16)/pstUART_->m_ulBaudRate) - 1);
+    usBaudTemp = (K_USHORT)(((SYSTEM_FREQ/16)/pstUART_->ulBaudRate) - 1);
 
     // Save the current port config registers
     usPortTemp = UART_SRB;
@@ -79,15 +79,15 @@ static void ATMegaUART_SetBaud( ATMegaUART_t *pstUART_ )
 void ATMegaUART_Init( ATMegaUART_t *pstUART_ )
 {    
     // Set up the FIFOs
-    pstUART_->m_ucTxHead = 0;
-    pstUART_->m_ucTxTail = 0;
-    pstUART_->m_ucRxHead = 0;
-    pstUART_->m_ucRxTail = 0;
-    pstUART_->m_bEcho = 0;
-    pstUART_->m_ucRxEscape = '\n';
+    pstUART_->ucTxHead = 0;
+    pstUART_->ucTxTail = 0;
+    pstUART_->ucRxHead = 0;
+    pstUART_->ucRxTail = 0;
+    pstUART_->bEcho = 0;
+    pstUART_->ucRxEscape = '\n';
     pstUART_->pfCallback = NULL;
-    pstUART_->m_bRxOverflow = 0;
-    pstUART_->m_ulBaudRate = UART_DEFAULT_BAUD;
+    pstUART_->bRxOverflow = 0;
+    pstUART_->ulBaudRate = UART_DEFAULT_BAUD;
     
     // Clear flags
     UART_SRA = 0;
@@ -126,21 +126,21 @@ K_USHORT ATMegaUART_Control( ATMegaUART_t *pstUART_, K_USHORT usCmdId_, K_USHORT
         case CMD_SET_BAUDRATE:
         {
             K_ULONG ulBaudRate = *((K_ULONG*)pvIn_);
-            pstUART_->m_ulBaudRate = ulBaudRate;
+            pstUART_->ulBaudRate = ulBaudRate;
             ATMegaUART_SetBaud( pstUART_ );
         }
             break;
         case CMD_SET_BUFFERS:
         {
-            pstUART_->m_pucRxBuffer = (K_UCHAR*)pvIn_;
-            pstUART_->m_pucTxBuffer = (K_UCHAR*)pvOut_;
-            pstUART_->m_ucRxSize = usSizeIn_;
-            pstUART_->m_ucTxSize = usSizeOut_;
+            pstUART_->pucRxBuffer = (K_UCHAR*)pvIn_;
+            pstUART_->pucTxBuffer = (K_UCHAR*)pvOut_;
+            pstUART_->ucRxSize = usSizeIn_;
+            pstUART_->ucTxSize = usSizeOut_;
         }            
             break;        
         case CMD_SET_RX_ESCAPE:
         {
-            pstUART_->m_ucRxEscape = *((K_UCHAR*)pvIn_);
+            pstUART_->ucRxEscape = *((K_UCHAR*)pvIn_);
         }
             break;
         case CMD_SET_RX_CALLBACK:
@@ -150,7 +150,7 @@ K_USHORT ATMegaUART_Control( ATMegaUART_t *pstUART_, K_USHORT usCmdId_, K_USHORT
             break;
         case CMD_SET_RX_ECHO:
         {
-            pstUART_->m_bEcho = *((K_UCHAR*)pvIn_);
+            pstUART_->bEcho = *((K_UCHAR*)pvIn_);
         }
             break;
         case CMD_SET_RX_ENABLE:
@@ -185,16 +185,16 @@ K_USHORT ATMegaUART_Read( ATMegaUART_t *pstUART_, K_USHORT usSizeIn_, K_UCHAR *p
     {        
         // If Tail != Head, there's data in the buffer.
         CS_ENTER();
-        if (pstUART_->m_ucRxTail != pstUART_->m_ucRxHead)
+        if (pstUART_->ucRxTail != pstUART_->ucRxHead)
         {
             // We have room to add the byte, so add it.
-            pucData[i] = pstUART_->m_pucRxBuffer[pstUART_->m_ucRxTail];
+            pucData[i] = pstUART_->pucRxBuffer[pstUART_->ucRxTail];
             
             // Update the buffer head pointer.
-            pstUART_->m_ucRxTail++;
-            if (pstUART_->m_ucRxTail >= pstUART_->m_ucRxSize)
+            pstUART_->ucRxTail++;
+            if (pstUART_->ucRxTail >= pstUART_->ucRxSize)
             {
-                pstUART_->m_ucRxTail = 0;
+                pstUART_->ucRxTail = 0;
             }
             usRead++;
         }
@@ -228,7 +228,7 @@ K_USHORT ATMegaUART_Write( ATMegaUART_t *pstUART_, K_USHORT usSizeOut_, K_UCHAR 
     K_UCHAR *pucData = (K_UCHAR*)pvData_;
     
     // If the head = tail, we need to start sending data out the data ourselves.
-    if (pstUART_->m_ucTxHead == pstUART_->m_ucTxTail)
+    if (pstUART_->ucTxHead == pstUART_->ucTxTail)
     {
         bActivate = 1;
     }
@@ -237,19 +237,19 @@ K_USHORT ATMegaUART_Write( ATMegaUART_t *pstUART_, K_USHORT usSizeOut_, K_UCHAR 
     {
         CS_ENTER();
         // Check that head != tail (we have room)
-        ucNext = (pstUART_->m_ucTxHead + 1);
-        if (ucNext >= pstUART_->m_ucTxSize)
+        ucNext = (pstUART_->ucTxHead + 1);
+        if (ucNext >= pstUART_->ucTxSize)
         {
             ucNext = 0;
         }
         
-        if (ucNext != pstUART_->m_ucTxTail)
+        if (ucNext != pstUART_->ucTxTail)
         {
             // We have room to add the byte, so add it.
-            pstUART_->m_pucTxBuffer[pstUART_->m_ucTxHead] = pucData[i];
+            pstUART_->pucTxBuffer[pstUART_->ucTxHead] = pucData[i];
             
             // Update the buffer head pointer.
-            pstUART_->m_ucTxHead = ucNext;
+            pstUART_->ucTxHead = ucNext;
             usWritten++;
         }
         else
@@ -290,15 +290,15 @@ void ATMegaUART_StartTx( ATMegaUART_t *pstUART_ )
     CS_ENTER();
     
     // Send the byte at the tail index
-    UART_UDR = pstUART_->m_pucTxBuffer[pstUART_->m_ucTxTail];
+    UART_UDR = pstUART_->pucTxBuffer[pstUART_->ucTxTail];
     
     // Update the tail index
-    ucNext = (pstUART_->m_ucTxTail + 1);
-    if (ucNext >= pstUART_->m_ucTxSize)
+    ucNext = (pstUART_->ucTxTail + 1);
+    if (ucNext >= pstUART_->ucTxSize)
     {
         ucNext = 0;
     }
-    pstUART_->m_ucTxTail = ucNext;
+    pstUART_->ucTxTail = ucNext;
     
     CS_EXIT();
 }
@@ -313,41 +313,41 @@ void ATMegaUART_RxISR( ATMegaUART_t *pstUART_ )
     ucTemp = UART_UDR;
     
     // Check that head != tail (we have room)
-    ucNext = (pstUART_->m_ucRxHead + 1);
-    if (ucNext >= pstUART_->m_ucRxSize)
+    ucNext = (pstUART_->ucRxHead + 1);
+    if (ucNext >= pstUART_->ucRxSize)
     {
         ucNext = 0;
     }
     
     // Always add the byte to the buffer (but flag an error if it's full...)
-    pstUART_->m_pucRxBuffer[pstUART_->m_ucRxHead] = ucTemp;
+    pstUART_->pucRxBuffer[pstUART_->ucRxHead] = ucTemp;
     
     // Update the buffer head pointer.
-    pstUART_->m_ucRxHead = ucNext;
+    pstUART_->ucRxHead = ucNext;
     
     // If the buffer's full, discard the oldest byte in the buffer and flag an error
-    if (ucNext == pstUART_->m_ucRxTail)
+    if (ucNext == pstUART_->ucRxTail)
     {
         // Update the buffer tail pointer
-        pstUART_->m_ucRxTail = (pstUART_->m_ucRxTail + 1);
-        if (pstUART_->m_ucRxTail >= pstUART_->m_ucRxSize)
+        pstUART_->ucRxTail = (pstUART_->ucRxTail + 1);
+        if (pstUART_->ucRxTail >= pstUART_->ucRxSize)
         {
-            pstUART_->m_ucRxTail = 0;
+            pstUART_->ucRxTail = 0;
         }
 
         // Flag an error - the buffer is full
-        pstUART_->m_bRxOverflow = 1;
+        pstUART_->bRxOverflow = 1;
     }
     
     // If local-echo is enabled, TX the K_CHAR
-    if (pstUART_->m_bEcho)
+    if (pstUART_->bEcho)
     {
         ATMegaUART_Write(pstUART_, 1, &ucTemp);
     }
     
     // If we've hit the RX callback character, run the callback
     // This is used for calling line-end functions, etc..
-    if (ucTemp == pstUART_->m_ucRxEscape)
+    if (ucTemp == pstUART_->ucRxEscape)
     {
         if (pstUART_->pfCallback)
         {
@@ -366,7 +366,7 @@ ISR(UART_RX_ISR)
 void ATMegaUART_TxISR( ATMegaUART_t *pstUART_ )
 {
     // If the head != tail, there's something to send.
-    if (pstUART_->m_ucTxHead != pstUART_->m_ucTxTail)
+    if (pstUART_->ucTxHead != pstUART_->ucTxTail)
     {
         ATMegaUART_StartTx( pstUART_ );
     }

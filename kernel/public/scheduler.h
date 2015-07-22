@@ -61,7 +61,7 @@ See license.txt for more information
 //---------------------------------------------------------------------------
 extern volatile Thread_t *g_pstNext;
 extern Thread_t *g_pstCurrent;
-extern K_BOOL m_bEnabled;           //! Scheduler's state - enabled or disabled
+extern K_BOOL bEnabled;           //! Scheduler's state - enabled or disabled
 
 //---------------------------------------------------------------------------
 /*!
@@ -160,7 +160,7 @@ ThreadList_t *Scheduler_GetThreadList( K_UCHAR ucPriority_ );
 
     \return true - scheduler enabled, false - disabled
 */
-#define Scheduler_IsEnabled() ( m_bEnabled )
+#define Scheduler_IsEnabled() ( bEnabled )
 
 #ifdef __cplusplus
     }

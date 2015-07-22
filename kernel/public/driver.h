@@ -66,15 +66,15 @@ See license.txt for more information
     following methods:
 
     \code
-    void DriverList::Add( Driver *pstDriver_ );
-    void DriverList::Remove( Driver *pstDriver_ );
+    void DriverList_Add( Driver *pstDriver_ );
+    void DriverList_Remove( Driver *pstDriver_ );
     \endcode
 
-    DriverList::Add()/Remove() takes a single arguments � the pointer to he 
+    DriverList_Add()/Remove() takes a single arguments � the pointer to he 
     object to operate on.
 
     Once a driver has been added to the table, drivers are opened by NAME using
-    DriverList::FindByName("/dev/name"). This function returns a pointer to 
+    DriverList_FindByName("/dev/name"). This function returns a pointer to 
     the specified driver if successful, or to a built in /dev/null device 
     if the path name is invalid.  After a driver is open, that pointer is used 
     for all other driver access functions.
@@ -91,9 +91,9 @@ See license.txt for more information
     drivers:
 
     \code
-    pstI2C  = DriverList::FindByName("/dev/i2c");
-    pstUART = DriverList::FindByName("/dev/tty0");
-    pstSPI  = DriverList::FindByName("/dev/spi");
+    pstI2C  = DriverList_FindByName("/dev/i2c");
+    pstUART = DriverList_FindByName("/dev/tty0");
+    pstSPI  = DriverList_FindByName("/dev/spi");
 
     pstI2C->Write(12,"Hello World!");
     pstUART->Write(12, "Hello World!");
@@ -267,7 +267,7 @@ const K_CHAR *Driver_GetPath( Driver_t *pstDriver_ );
 void DriverList_Init( void );
 
 //---------------------------------------------------------------------------
-Driver_t *DriverList_FindByPath( const K_CHAR *m_pcPath );
+Driver_t *DriverList_FindByPath( const K_CHAR *pcPath );
 
 //---------------------------------------------------------------------------
 void DriverList_Add( Driver_t *pstDriver_ );

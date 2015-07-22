@@ -26,7 +26,7 @@ See license.txt for more information
 #include <avr/interrupt.h>
 
 #if KERNEL_USE_PROFILER
-K_ULONG m_ulEpoch;
+K_ULONG ulEpoch;
 
 //---------------------------------------------------------------------------
 void Profiler_Init( void )
@@ -35,7 +35,7 @@ void Profiler_Init( void )
     TCCR0B = 0;
     TIFR0 = 0;
     TIMSK0 = 0;
-    m_ulEpoch = 0;
+    ulEpoch = 0;
 }
 
 //---------------------------------------------------------------------------
@@ -70,14 +70,14 @@ K_USHORT Profiler_Read( void )
 void Profiler_Process( void )
 {
     CS_ENTER();
-    m_ulEpoch++;
+    ulEpoch++;
     CS_EXIT();
 }
 
 //---------------------------------------------------------------------------
 K_ULONG Profiler_GetEpoch( void )
 { 
-	return m_ulEpoch; 
+	return ulEpoch; 
 }
 
 //---------------------------------------------------------------------------

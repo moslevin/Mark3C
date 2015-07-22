@@ -34,20 +34,20 @@ See license.txt for more information
 void ThreadList_Init( ThreadList_t *pstList_ )
 { 
 	CircularLinkList_Init( (CircularLinkList_t*)pstList_ );
-	pstList_->m_ucPriority = 0; 
-	pstList_->m_pucFlag = NULL; 
+	pstList_->ucPriority = 0; 
+	pstList_->pucFlag = NULL; 
 }
 
 //---------------------------------------------------------------------------
 void ThreadList_SetPriority( ThreadList_t *pstList_, K_UCHAR ucPriority_ )
 {
-    pstList_->m_ucPriority = ucPriority_;
+    pstList_->ucPriority = ucPriority_;
 }
 
 //---------------------------------------------------------------------------
 void ThreadList_SetFlagPointer( ThreadList_t *pstList_, K_UCHAR *pucFlag_)
 {
-    pstList_->m_pucFlag = pucFlag_;
+    pstList_->pucFlag = pucFlag_;
 }
 
 //---------------------------------------------------------------------------
@@ -58,10 +58,10 @@ void ThreadList_Add( ThreadList_t *pstList_, Thread_t *node_ )
     CircularLinkList_PivotForward( pstCLL );
     
     // We've specified a bitmap for this threadlist
-    if (pstList_->m_pucFlag)
+    if (pstList_->pucFlag)
     {
         // Set the flag for this priority level
-        *pstList_->m_pucFlag |= (1 << pstList_->m_ucPriority);
+        *pstList_->pucFlag |= (1 << pstList_->ucPriority);
     }
 }
 
@@ -81,12 +81,12 @@ void ThreadList_Remove( ThreadList_t *pstList_, Thread_t *node_) {
     CircularLinkList_Remove( pstCLL, (LinkListNode_t*)node_);
     
     // If the list is empty...
-    if (!pstCLL->m_pstHead)
+    if (!pstCLL->pstHead)
     {
         // Clear the bit in the bitmap at this priority level
-        if (pstList_->m_pucFlag)
+        if (pstList_->pucFlag)
         {
-            *pstList_->m_pucFlag &= ~(1 << pstList_->m_ucPriority);
+            *pstList_->pucFlag &= ~(1 << pstList_->ucPriority);
         }
     }
 }

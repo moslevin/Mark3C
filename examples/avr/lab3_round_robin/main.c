@@ -19,7 +19,7 @@ Lab Example 3:  Using round-robin scheduling to time-slice the CPU.
 
 Lessons covered in this example include:
 - Threads at the same priority get timesliced automatically
-- The Thread::SetQuantum() API can be used to set the maximum amount of CPU
+- The Thread_SetQuantum() API can be used to set the maximum amount of CPU
   time a thread can take before being swapped for another task at that
   priority level.
 
@@ -35,7 +35,7 @@ Takeaway:
 // defines a thread object, stack (in word-array form), and the entry-point
 // function used by the application thread.
 #define APP1_STACK_SIZE      (320/sizeof(K_WORD))
-static Thread_t  clApp1Thread;
+static Thread_t  stApp1Thread;
 static K_WORD  awApp1Stack[APP1_STACK_SIZE];
 static void    App1Main(void *unused_);
 
@@ -44,7 +44,7 @@ static void    App1Main(void *unused_);
 // defines a thread object, stack (in word-array form), and the entry-point
 // function used by the application thread.
 #define APP2_STACK_SIZE      (320/sizeof(K_WORD))
-static Thread_t  clApp2Thread;
+static Thread_t  stApp2Thread;
 static K_WORD  awApp2Stack[APP2_STACK_SIZE];
 static void    App2Main(void *unused_);
 
@@ -58,8 +58,8 @@ int main(void)
     // As a result, the CPU will automatically swap between these threads
     // at runtime to ensure that each get a chance to execute.
 
-	Thread_Init( &clApp1Thread, awApp1Stack,  APP1_STACK_SIZE,  1, App1Main,  0);
-    Thread_Init( &clApp2Thread, awApp2Stack,  APP2_STACK_SIZE,  1, App2Main,  0);
+    Thread_Init( &stApp1Thread, awApp1Stack,  APP1_STACK_SIZE,  1, App1Main,  0);
+    Thread_Init( &stApp2Thread, awApp2Stack,  APP2_STACK_SIZE,  1, App2Main,  0);
 
     // Set the threads up so that Thread 1 can get 4ms of CPU time uninterrupted,
     // but Thread 2 can get 8ms of CPU time uninterrupted.  This means that
@@ -71,11 +71,11 @@ int main(void)
     // priority group by default.  You can play around with these values and
     // observe how it affects the execution of both threads.
 
-    Thread_SetQuantum( &clApp1Thread, 4 );
-    Thread_SetQuantum( &clApp2Thread, 8 );
+    Thread_SetQuantum( &stApp1Thread, 4 );
+    Thread_SetQuantum( &stApp2Thread, 8 );
 
-    Thread_Start( &clApp1Thread );
-    Thread_Start( &clApp2Thread );
+    Thread_Start( &stApp1Thread );
+    Thread_Start( &stApp2Thread );
 
     Kernel_Start();
 

@@ -87,7 +87,7 @@ struct _ThreadList
     // Inherit from CircularLinkList_t -- must be first!!
     CircularLinkList_t stList;
 
-    //! Priority of the threadlist
+    //! Priority of the threadlist  
     K_UCHAR ucPriority;
 
     //! Pointer to the bitmap/flag to set when used for scheduling.

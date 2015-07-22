@@ -12,6 +12,7 @@ Copyright (c) 2012-2015 Funkenstein Software Consulting, all rights reserved.
 See license.txt for more information
 ===========================================================================*/
 #include "mark3.h"
+#include "drvUART.h"
 
 /*===========================================================================
 
@@ -26,11 +27,11 @@ and should be well understood before moving on to other examples.
 
 Lessons covered in this example include:
 
-- Usage of the Kernel class - configuring and starting the kernel
-- Usage of the Thread_t class - initializing and starting static threads.
+- Usage of the Kernel object - configuring and starting the kernel
+- Usage of the Thread_t object - initializing and starting static threads.
 - Demonstrate the relationship between Thread_t objects, stacks, and entry
   functions.
-- Usage of Thread_t::Sleep() to block execution of a thread for a period of time
+- Usage of Thread_t_Sleep() to block execution of a thread for a period of time
 - When using an idle thread, the idle thread MUST not block.
 
 Exercise:
@@ -51,7 +52,7 @@ of static threads.
 // defines a thread object, stack (in word-array form), and the entry-point
 // function used by the application thread.
 #define APP_STACK_SIZE      (320/sizeof(K_WORD))
-static Thread_t  clAppThread;
+static Thread_t  stAppThread;
 static K_WORD  awAppStack[APP_STACK_SIZE];
 static void    AppMain(void *unused_);
 
@@ -60,16 +61,18 @@ static void    AppMain(void *unused_);
 // thread object, stack (in word-array form), and the entry-point function
 // used by the idle thread.
 #define IDLE_STACK_SIZE     (320/sizeof(K_WORD))
-static Thread_t  clIdleThread;
+static Thread_t  stIdleThread;
 static K_WORD  awIdleStack[IDLE_STACK_SIZE];
 static void    IdleMain(void *unused_);
 
+K_UCHAR aucRX[32];
+K_UCHAR aucTX[32];
 //---------------------------------------------------------------------------
 int main(void)
 {
-    // Before any Mark3 RTOS APIs can be called, the user must call Kernel::Init().
+    // Before any Mark3 RTOS APIs can be called, the user must call Kernel_Init().
     // Note that if you have any hardware-specific init code, it can be called
-    // before Kernel::Init, so long as it does not enable interrupts, or
+    // before Kernel_Init, so long as it does not enable interrupts, or
     // rely on hardware peripherals (timer, software interrupt, etc.) used by the
     // kernel.
     Kernel_Init();
@@ -83,12 +86,12 @@ int main(void)
     // Initialize the application thread to use a specified word-array as its stack.
     // The thread will run at priority level "1", and start execution the
     // "AppMain" function when it's started.
-	Thread_Init( &clAppThread, awAppStack,  APP_STACK_SIZE,  1, AppMain,  0);
+    Thread_Init( &stAppThread, awAppStack,  APP_STACK_SIZE,  1, AppMain,  0);
 
     // Initialize the idle thread to use a specific word-array as its stack.
     // The thread will run at priority level "0", which is reserved for the idle
     // priority thread.  IdleMain will be run when the thread is started.
-    Thread_Init( &clIdleThread, awIdleStack, IDLE_STACK_SIZE, 0, IdleMain, 0);
+    Thread_Init( &stIdleThread, awIdleStack, IDLE_STACK_SIZE, 0, IdleMain, 0);
 
     // Once the static threads have been added, the user must then ensure that the
     // threads are ready to execute.  By default, creating a thread is created
@@ -98,8 +101,8 @@ int main(void)
     // that's OK.  When the kernel is started, it will choose which thread to run
     // first from the pool of ready threads.
 
-	Thread_Start( &clAppThread );
-	Thread_Start( &clIdleThread );
+    Thread_Start( &stAppThread );
+    Thread_Start( &stIdleThread );
     
     // All threads have been initialized and made ready.  The kernel will now
     // select the first thread to run, enable the hardware required to run the
@@ -108,14 +111,17 @@ int main(void)
     // point, execution will transition to the highest-priority ready thread.
     // This function will not return.
 
+    ATMegaUART_Init( &stUART );
+
     Kernel_Start();
 
-    // As Kernel::Start() results in the operating system being executed, control
+    // As Kernel_Start() results in the operating system being executed, control
     // will not be relinquished back to main().  The "return 0" is simply to
     // avoid warnings.
 
     return 0;
 }
+
 
 //---------------------------------------------------------------------------
 void AppMain(void *unused_)
@@ -125,10 +131,16 @@ void AppMain(void *unused_)
     // while before repeating the message.  Note that while the thread is
     // sleeping, CPU execution will transition to the Idle thread.
 
+    Driver_Control( (Driver_t*)&stUART, CMD_SET_BUFFERS, 32, aucRX, 32, aucTX);
+    K_ULONG ulBaud = 57600;
+
+    Driver_Control( (Driver_t*)&stUART, CMD_SET_BAUDRATE, 0, (void*)&ulBaud, 0, 0 );
+    Driver_Open( (Driver_t*)&stUART );
+
     while(1)
     {
-        // KernelAware_Print("Hello World!\n");
-        Thread_Sleep(10);
+        Driver_Write( (Driver_t*)&stUART, 12, (K_UCHAR*)"Hello World\n" );
+        Thread_Sleep(1000);
     }
 }
 

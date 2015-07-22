@@ -36,30 +36,30 @@ See license.txt for more information
 //---------------------------------------------------------------------------
 void ProfileTimer_Init( ProfileTimer_t *pstTimer_ )
 {
-    pstTimer_->m_ulCumulative = 0;
-    pstTimer_->m_ulCurrentIteration = 0;
-    pstTimer_->m_usIterations = 0;
-    pstTimer_->m_bActive = 0;
+    pstTimer_->ulCumulative = 0;
+    pstTimer_->ulCurrentIteration = 0;
+    pstTimer_->usIterations = 0;
+    pstTimer_->bActive = 0;
 }
 
 //---------------------------------------------------------------------------    
 void ProfileTimer_Start( ProfileTimer_t *pstTimer_ )
 {
-    if (!pstTimer_->m_bActive)
+    if (!pstTimer_->bActive)
     {
         CS_ENTER();
-        pstTimer_->m_ulCurrentIteration = 0;
-        pstTimer_->m_ulInitialEpoch = Profiler_GetEpoch();
-        pstTimer_->m_usInitial = Profiler_Read();
+        pstTimer_->ulCurrentIteration = 0;
+        pstTimer_->ulInitialEpoch = Profiler_GetEpoch();
+        pstTimer_->usInitial = Profiler_Read();
         CS_EXIT();
-        pstTimer_->m_bActive = 1;
+        pstTimer_->bActive = 1;
     }
 }
 
 //---------------------------------------------------------------------------    
 void ProfileTimer_Stop( ProfileTimer_t *pstTimer_ )
 {
-    if (pstTimer_->m_bActive)
+    if (pstTimer_->bActive)
     {
         K_USHORT usFinal;
         K_ULONG ulEpoch;
@@ -67,20 +67,20 @@ void ProfileTimer_Stop( ProfileTimer_t *pstTimer_ )
         usFinal = Profiler_Read();
         ulEpoch = Profiler_GetEpoch();
         // Compute total for current iteration...
-        pstTimer_->m_ulCurrentIteration = ProfileTimer_ComputeCurrentTicks( pstTimer_, usFinal, ulEpoch);
-        pstTimer_->m_ulCumulative += pstTimer_->m_ulCurrentIteration;
-        pstTimer_->m_usIterations++;
+        pstTimer_->ulCurrentIteration = ProfileTimer_ComputeCurrentTicks( pstTimer_, usFinal, ulEpoch);
+        pstTimer_->ulCumulative += pstTimer_->ulCurrentIteration;
+        pstTimer_->usIterations++;
         CS_EXIT();
-        pstTimer_->m_bActive = 0;
+        pstTimer_->bActive = 0;
     }
 }
 
 //---------------------------------------------------------------------------    
 K_ULONG ProfileTimer_GetAverage( ProfileTimer_t *pstTimer_ )
 {
-    if (pstTimer_->m_usIterations)
+    if (pstTimer_->usIterations)
     {
-        return pstTimer_->m_ulCumulative / (K_ULONG)pstTimer_->m_usIterations;
+        return pstTimer_->ulCumulative / (K_ULONG)pstTimer_->usIterations;
     }
     return 0;
 }
@@ -88,7 +88,7 @@ K_ULONG ProfileTimer_GetAverage( ProfileTimer_t *pstTimer_ )
 //---------------------------------------------------------------------------     
 K_ULONG ProfileTimer_GetCurrent( ProfileTimer_t *pstTimer_ )
 {
-    if (pstTimer_->m_bActive)
+    if (pstTimer_->bActive)
     {
 		K_USHORT usCurrent;
 		K_ULONG ulEpoch;
@@ -98,7 +98,7 @@ K_ULONG ProfileTimer_GetCurrent( ProfileTimer_t *pstTimer_ )
 		CS_EXIT();
         return ProfileTimer_ComputeCurrentTicks( pstTimer_, usCurrent, ulEpoch);
     }
-    return pstTimer_->m_ulCurrentIteration;
+    return pstTimer_->ulCurrentIteration;
 }
 
 //---------------------------------------------------------------------------
@@ -107,25 +107,25 @@ K_ULONG ProfileTimer_ComputeCurrentTicks( ProfileTimer_t *pstTimer_, K_USHORT us
     K_ULONG ulTotal;
 	K_ULONG ulOverflows;
 	
-    ulOverflows = ulEpoch_ - pstTimer_->m_ulInitialEpoch;
+    ulOverflows = ulEpoch_ - pstTimer_->ulInitialEpoch;
 	
 	// More than one overflow...
 	if (ulOverflows > 1)
 	{
         ulTotal = ((K_ULONG)(ulOverflows-1) * TICKS_PER_OVERFLOW)
-                + (K_ULONG)(TICKS_PER_OVERFLOW - pstTimer_->m_usInitial) +
+                + (K_ULONG)(TICKS_PER_OVERFLOW - pstTimer_->usInitial) +
 				(K_ULONG)usCurrent_;		
 	}
 	// Only one overflow, or one overflow that has yet to be processed
-    else if (ulOverflows || (usCurrent_ < pstTimer_->m_usInitial))
+    else if (ulOverflows || (usCurrent_ < pstTimer_->usInitial))
 	{
-        ulTotal = (K_ULONG)(TICKS_PER_OVERFLOW - pstTimer_->m_usInitial) +
+        ulTotal = (K_ULONG)(TICKS_PER_OVERFLOW - pstTimer_->usInitial) +
 				(K_ULONG)usCurrent_;		
 	}
 	// No overflows, none pending.
 	else
 	{
-        ulTotal = (K_ULONG)(usCurrent_ - pstTimer_->m_usInitial);
+        ulTotal = (K_ULONG)(usCurrent_ - pstTimer_->usInitial);
 	}
 
     return ulTotal;

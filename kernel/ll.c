@@ -35,22 +35,22 @@ void DoubleLinkList_Add( DoubleLinkList_t *pstList_, LinkListNode_t *node_)
 	KERNEL_ASSERT( node_ );
 	
     // Add a node to the end of the linked list.
-    if (!pstList_->m_pstHead)
+    if (!pstList_->pstHead)
     {
         // If the list is empty, initilize the nodes
-        pstList_->m_pstHead = node_;
-        pstList_->m_pstTail = node_;
+        pstList_->pstHead = node_;
+        pstList_->pstTail = node_;
 
-        pstList_->m_pstHead->prev = NULL;
-        pstList_->m_pstTail->next = NULL;
+        pstList_->pstHead->prev = NULL;
+        pstList_->pstTail->next = NULL;
         return;
     }
     
     // Move the tail node, and assign it to the new node just passed in
-    pstList_->m_pstTail->next = node_;
-    node_->prev = pstList_->m_pstTail;
+    pstList_->pstTail->next = node_;
+    node_->prev = pstList_->pstTail;
     node_->next = NULL;    
-    pstList_->m_pstTail = node_;
+    pstList_->pstTail = node_;
 }
 
 //---------------------------------------------------------------------------
@@ -78,13 +78,13 @@ void DoubleLinkList_Remove( DoubleLinkList_t *pstList_, LinkListNode_t *node_)
 #endif
         node_->next->prev = node_->prev;
     }
-    if (node_ == pstList_->m_pstHead)
+    if (node_ == pstList_->pstHead)
     {        
-        pstList_->m_pstHead = node_->next;
+        pstList_->pstHead = node_->next;
     }
-    if (node_ == pstList_->m_pstTail)
+    if (node_ == pstList_->pstTail)
     {
-        pstList_->m_pstTail = node_->prev;
+        pstList_->pstTail = node_->prev;
     }
     
     LinkListNode_Clear( node_ );
@@ -98,23 +98,23 @@ void CircularLinkList_Add( CircularLinkList_t *pstList_, LinkListNode_t *node_)
 	KERNEL_ASSERT( node_ );
 
     // Add a node to the end of the linked list.
-    if (!pstList_->m_pstHead)
+    if (!pstList_->pstHead)
     {
         // If the list is empty, initilize the nodes
-        pstList_->m_pstHead = node_;
-        pstList_->m_pstTail = node_;
+        pstList_->pstHead = node_;
+        pstList_->pstTail = node_;
 
-        pstList_->m_pstHead->prev = pstList_->m_pstHead;
-        pstList_->m_pstHead->next = pstList_->m_pstHead;
+        pstList_->pstHead->prev = pstList_->pstHead;
+        pstList_->pstHead->next = pstList_->pstHead;
         return;
     }
     
     // Move the tail node, and assign it to the new node just passed in
-    pstList_->m_pstTail->next = node_;
-    node_->prev = pstList_->m_pstTail;
-    node_->next = pstList_->m_pstHead;
-    pstList_->m_pstTail = node_;
-    pstList_->m_pstHead->prev = node_;
+    pstList_->pstTail->next = node_;
+    node_->prev = pstList_->pstTail;
+    node_->next = pstList_->pstHead;
+    pstList_->pstTail = node_;
+    pstList_->pstHead->prev = node_;
 }
 
 //---------------------------------------------------------------------------
@@ -123,11 +123,11 @@ void CircularLinkList_Remove( CircularLinkList_t *pstList_, LinkListNode_t *node
 	KERNEL_ASSERT( node_ );
 	
     // Check to see if this is the head of the list...
-    if ((node_ == pstList_->m_pstHead) && (pstList_->m_pstHead == pstList_->m_pstTail))
+    if ((node_ == pstList_->pstHead) && (pstList_->pstHead == pstList_->pstTail))
     {
         // Clear the head and tail pointers - nothing else left.
-        pstList_->m_pstHead = NULL;
-        pstList_->m_pstTail = NULL;
+        pstList_->pstHead = NULL;
+        pstList_->pstTail = NULL;
         return;
     }
     
@@ -144,13 +144,13 @@ void CircularLinkList_Remove( CircularLinkList_t *pstList_, LinkListNode_t *node
     node_->next->prev = node_->prev;
     node_->prev->next = node_->next;
     
-    if (node_ == pstList_->m_pstHead)
+    if (node_ == pstList_->pstHead)
     {
-        pstList_->m_pstHead = pstList_->m_pstHead->next;
+        pstList_->pstHead = pstList_->pstHead->next;
     }
-    if (node_ == pstList_->m_pstTail)
+    if (node_ == pstList_->pstTail)
     {
-        pstList_->m_pstTail = pstList_->m_pstTail->prev;
+        pstList_->pstTail = pstList_->pstTail->prev;
     }
     LinkListNode_Clear( node_ );
 }
@@ -158,19 +158,19 @@ void CircularLinkList_Remove( CircularLinkList_t *pstList_, LinkListNode_t *node
 //---------------------------------------------------------------------------
 void CircularLinkList_PivotForward( CircularLinkList_t *pstList_ )
 {
-    if (pstList_->m_pstHead)
+    if (pstList_->pstHead)
     {
-        pstList_->m_pstHead = pstList_->m_pstHead->next;
-        pstList_->m_pstTail = pstList_->m_pstTail->next;
+        pstList_->pstHead = pstList_->pstHead->next;
+        pstList_->pstTail = pstList_->pstTail->next;
     }
 }
 
 //---------------------------------------------------------------------------
 void CircularLinkList_PivotBackward(  CircularLinkList_t *pstList_ )
 {
-    if (pstList_->m_pstHead)
+    if (pstList_->pstHead)
     {
-        pstList_->m_pstHead = pstList_->m_pstHead->prev;
-        pstList_->m_pstTail = pstList_->m_pstTail->prev;
+        pstList_->pstHead = pstList_->pstHead->prev;
+        pstList_->pstTail = pstList_->pstTail->prev;
     }
 }

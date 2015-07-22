@@ -146,7 +146,7 @@ See license.txt for more information
 
 /*!
     Do you want to be able to set threads to sleep for a specified time?
-    This enables the Thread_t::Sleep() API.
+    This enables the Thread_t_Sleep() API.
 */
 #if KERNEL_USE_TIMERS && KERNEL_USE_SEMAPHORE
     #define KERNEL_USE_SLEEP             (1)

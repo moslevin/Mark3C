@@ -39,9 +39,9 @@ See license.txt for more information
 static volatile K_BOOL bAddQuantumTimer;	// Indicates that a timer add is pending
 
 //---------------------------------------------------------------------------
-static Timer_t   m_clQuantumTimer;	// The global timernodelist_t object
-static K_UCHAR m_bActive;
-static K_UCHAR m_bInTimer;
+static Timer_t   stQuantumTimer;	// The global timernodelist_t object
+static K_UCHAR bActive;
+static K_UCHAR bInTimer;
 //---------------------------------------------------------------------------
 /*!
  * \brief QuantumCallback
@@ -72,19 +72,19 @@ static void QuantumCallback(Thread_t *pstThread_, void *pvData_)
 }
 
 //---------------------------------------------------------------------------
-void Quantum_SetTimer(Thread_t *pstThread_)
+void QuantuSetTimer(Thread_t *pstThread_)
 {
-    Timer_SetIntervalMSeconds( &m_clQuantumTimer, Thread_GetQuantum( pstThread_ ) );
-    Timer_SetFlags( &m_clQuantumTimer, TIMERLIST_FLAG_ONE_SHOT );
-    Timer_SetData( &m_clQuantumTimer, NULL );
-    Timer_SetCallback( &m_clQuantumTimer, (TimerCallback_t)QuantumCallback );
-    Timer_SetOwner( &m_clQuantumTimer, pstThread_ );
+    Timer_SetIntervalMSeconds( &stQuantumTimer, Thread_GetQuantum( pstThread_ ) );
+    Timer_SetFlags( &stQuantumTimer, TIMERLIST_FLAG_ONE_SHOT );
+    Timer_SetData( &stQuantumTimer, NULL );
+    Timer_SetCallback( &stQuantumTimer, (TimerCallback_t)QuantumCallback );
+    Timer_SetOwner( &stQuantumTimer, pstThread_ );
 }
 
 //---------------------------------------------------------------------------
-void Quantum_AddThread( Thread_t *pstThread_ )
+void QuantuAddThread( Thread_t *pstThread_ )
 {
-    if (m_bActive
+    if (bActive
 #if KERNEL_USE_IDLE_FUNC
             || (pstThread_ == Kernel_GetIdleThread())
 #endif
@@ -94,7 +94,7 @@ void Quantum_AddThread( Thread_t *pstThread_ )
 	}		
 	
 	// If this is called from the timer callback, queue a timer add...
-	if (m_bInTimer)
+	if (bInTimer)
 	{
 		bAddQuantumTimer = true;
 		return;
@@ -105,27 +105,27 @@ void Quantum_AddThread( Thread_t *pstThread_ )
     if ( LinkList_GetHead( (LinkList_t*)pstOwner ) !=
            LinkList_GetTail( (LinkList_t*)pstOwner ) )
     {
-        Quantum_SetTimer( pstThread_ );
-        TimerScheduler_Add( &m_clQuantumTimer );
-		m_bActive = 1;
+        QuantuSetTimer( pstThread_ );
+        TimerScheduler_Add( &stQuantumTimer );
+		bActive = 1;
     }    
 }
 
 //---------------------------------------------------------------------------
-void Quantum_RemoveThread( void )
+void QuantuRemoveThread( void )
 {
-	if (!m_bActive)
+	if (!bActive)
 	{
 		return;
 	}		
 
     // Cancel the current timer
-    TimerScheduler_Remove( &m_clQuantumTimer );
-	m_bActive = 0;
+    TimerScheduler_Remove( &stQuantumTimer );
+	bActive = 0;
 }
 
 //---------------------------------------------------------------------------
-void Quantum_UpdateTimer( void )
+void QuantuUpdateTimer( void )
 {
     // If we have to re-add the quantum timer (more than 2 threads at the 
     // high-priority level...)
@@ -138,15 +138,15 @@ void Quantum_UpdateTimer( void )
     }    
 }
 //---------------------------------------------------------------------------
-void Quantum_SetInTimer( void )
+void QuantuSetInTimer( void )
 {
-    m_bInTimer = true;
+    bInTimer = true;
 }
 
 //---------------------------------------------------------------------------
-void Quantum_ClearInTimer(void)
+void QuantustearInTimer(void)
 {
-    m_bInTimer = false;
+    bInTimer = false;
 }
 
 

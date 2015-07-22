@@ -25,7 +25,7 @@ See license.txt for more information
 	
 	\code
 	
-	ProfileTimer_t clMyTimer;
+	ProfileTimer_t stMyTimer;
 	int i;
 	
 	clMyTimer.Init();
@@ -41,10 +41,10 @@ See license.txt for more information
 	}
 	
 	// Get the average execution time of all iterations
-	ulAverageTimer = clMyTimer.GetAverage();
+	ulAverageTimer = stMyTimer.GetAverage();
 	
 	// Get the execution time from the last iteration
-	ulLastTimer = clMyTimer.GetCurrent();
+	ulLastTimer = stMyTimer.GetCurrent();
 	
 	\endcode
 */
@@ -66,12 +66,12 @@ See license.txt for more information
 //---------------------------------------------------------------------------
 typedef struct
 {
-    K_ULONG m_ulCumulative;  //!< Cumulative tick-count for this timer
-    K_ULONG m_ulCurrentIteration; //!< Tick-count for the current iteration
-    K_USHORT m_usInitial;	   //!< Initial count
-    K_ULONG m_ulInitialEpoch; //!< Initial Epoch
-    K_USHORT m_usIterations; //!< Number of iterations executed for this profiling timer
-    K_UCHAR m_bActive;	   //!< Wheter or not the timer is active or stopped
+    K_ULONG ulCumulative;  //!< Cumulative tick-count for this timer
+    K_ULONG ulCurrentIteration; //!< Tick-count for the current iteration
+    K_USHORT usInitial;	   //!< Initial count
+    K_ULONG ulInitialEpoch; //!< Initial Epoch
+    K_USHORT usIterations; //!< Number of iterations executed for this profiling timer
+    K_UCHAR bActive;	   //!< Wheter or not the timer is active or stopped
 } ProfileTimer_t;
 
 //---------------------------------------------------------------------------

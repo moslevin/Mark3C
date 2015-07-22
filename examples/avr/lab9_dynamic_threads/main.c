@@ -35,7 +35,7 @@ of the application.
 // defines a thread object, stack (in word-array form), and the entry-point
 // function used by the application thread.
 #define APP1_STACK_SIZE      (320/sizeof(K_WORD))
-static Thread_t  clApp1Thread;
+static Thread_t  stApp1Thread;
 static K_WORD  awApp1Stack[APP1_STACK_SIZE];
 static void    App1Main(void *unused_);
 
@@ -51,8 +51,8 @@ int main(void)
     // See the annotations in previous labs for details on init.
     Kernel_Init();
 
-    Thread_Init( &clApp1Thread, awApp1Stack,  APP1_STACK_SIZE,  1, App1Main,  0);
-    Thread_Start( &clApp1Thread );
+    Thread_Init( &stApp1Thread, awApp1Stack,  APP1_STACK_SIZE,  1, App1Main,  0);
+    Thread_Start( &stApp1Thread );
 
     Kernel_Start();
 
@@ -62,7 +62,7 @@ int main(void)
 //---------------------------------------------------------------------------
 static void WorkerMain1(void *arg_)
 {
-    Semaphore_t *pclSem = (Semaphore_t*)arg_;
+    Semaphore_t *pstSem = (Semaphore_t*)arg_;
     K_ULONG ulCount = 0;
 
     // Do some work.  Post a semaphore to notify the other thread that the
@@ -73,7 +73,7 @@ static void WorkerMain1(void *arg_)
     }
 
     KernelAware_Print( "Worker1 -- Done Work\n");
-    Semaphore_Post( pclSem );
+    Semaphore_Post( pstSem );
 
     // Work is completed, just spin now.  Let another thread destory us.
     while(1) { }
@@ -96,16 +96,16 @@ static void WorkerMain2(void *arg_)
 //---------------------------------------------------------------------------
 void App1Main(void *unused_)
 {
-    Thread_t clMyThread;
-    Semaphore_t clMySem;
+    Thread_t stMyThread;
+    Semaphore_t stMySem;
 
-    Semaphore_Init( &clMySem, 0,1);
+    Semaphore_Init( &stMySem, 0,1);
     while (1)
     {
         // Example 1 - create a worker thread at our current priority in order to
         // parallelize some work.
-        Thread_Init( &clMyThread, awApp2Stack, APP2_STACK_SIZE, 1, WorkerMain1, (void*)&clMySem );
-        Thread_Start( &clMyThread );
+        Thread_Init( &stMyThread, awApp2Stack, APP2_STACK_SIZE, 1, WorkerMain1, (void*)&stMySem );
+        Thread_Start( &stMyThread );
 
         // Do some work of our own in parallel, while the other thread works on its project.
         K_ULONG ulCount = 0;
@@ -117,16 +117,16 @@ void App1Main(void *unused_)
         KernelAware_Print( "Thread -- Done Work\n" );
 
         // Wait for the other thread to finish its job.
-        Semaphore_Pend( &clMySem );
+        Semaphore_Pend( &stMySem );
 
         // Once the thread has signalled us, we can safely call "Exit" on the thread to
         // remove it from scheduling and recycle it later.
-        Thread_Exit( &clMyThread );
+        Thread_Exit( &stMyThread );
 
         // Spin the thread up again to do something else in parallel.  This time, the thread
         // will run completely asynchronously to this thread.
-        Thread_Init( &clMyThread, awApp2Stack, APP2_STACK_SIZE, 1, WorkerMain2, 0 );
-        Thread_Start( &clMyThread );
+        Thread_Init( &stMyThread, awApp2Stack, APP2_STACK_SIZE, 1, WorkerMain2, 0 );
+        Thread_Start( &stMyThread );
 
         ulCount = 0;
         while (ulCount < 10000)
@@ -138,7 +138,7 @@ void App1Main(void *unused_)
 
         // Check that we're sure the worker thread has terminated before we try running the
         // test loop again.
-        while (Thread_GetState( &clMyThread ) != THREAD_STATE_EXIT) { }
+        while (Thread_GetState( &stMyThread ) != THREAD_STATE_EXIT) { }
 
         KernelAware_Print ("  Test Done\n");
         Thread_Sleep(100);

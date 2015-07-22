@@ -48,13 +48,13 @@ typedef void (*WriteBufferCallback)( K_USHORT *pusData_, K_USHORT usSize_ );
  */
 struct _WriteBuffer16
 {
-    K_USHORT *m_pusData;				//!< Pointer to the circular buffer data
+    K_USHORT *pusData;				//!< Pointer to the circular buffer data
 
-    volatile K_USHORT m_usSize;			//!< Size of the buffer
-    volatile K_USHORT m_usHead;			//!< Current head element (where data is written)
-    volatile K_USHORT m_usTail;			//!< Current tail element (where data is read)
+    volatile K_USHORT usSize;			//!< Size of the buffer
+    volatile K_USHORT usHead;			//!< Current head element (where data is written)
+    volatile K_USHORT usTail;			//!< Current tail element (where data is read)
 
-    WriteBufferCallback m_pfCallback;	//!< Buffer callback function
+    WriteBufferCallback pfCallback;	//!< Buffer callback function
 };
 typedef struct _WriteBuffer16 WriteBuffer16_t;
 

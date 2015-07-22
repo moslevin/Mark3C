@@ -115,7 +115,7 @@ void Thread_Stop( Thread_t *pstThread_ );
  * \param pstThread_ Pointer to the thread to modify
  * \param szName_ Char string containing the thread name
  */
-#define Thread_SetName( pstThread_, szName_) ( ((Thread_t*)pstThread_)->m_szName = szName_ )
+#define Thread_SetName( pstThread_, szName_) ( ((Thread_t*)pstThread_)->szName = szName_ )
 
 //---------------------------------------------------------------------------
 /*!
@@ -126,7 +126,7 @@ void Thread_Stop( Thread_t *pstThread_ );
  * \param pstThread_ Pointer to the thread to inspect
  * \return Pointer to the name of the thread.  If this is not set, will be NULL.
  */
-#define Thread_GetName( pstThread_ ) ( ((Thread_t*)pstThread_)->m_szName )
+#define Thread_GetName( pstThread_ ) ( ((Thread_t*)pstThread_)->szName )
 #endif
 
 //---------------------------------------------------------------------------
@@ -139,7 +139,7 @@ void Thread_Stop( Thread_t *pstThread_ );
  * \param pstThread_ Pointer to the thread to access/modify
  * \return Pointer to the Thread_t's owner list
  */
-#define Thread_GetOwner( pstThread_ ) ( ((Thread_t*)pstThread_)->m_pstOwner )
+#define Thread_GetOwner( pstThread_ ) ( ((Thread_t*)pstThread_)->pstOwner )
 
 //---------------------------------------------------------------------------
 /*!
@@ -150,7 +150,7 @@ void Thread_Stop( Thread_t *pstThread_ );
  * \param pstThread_ Pointer to the thread to access/modify
  * \return Pointer to the thread's current list
  */
-#define Thread_GetCurrent( pstThread_ ) ( ((Thread_t*)pstThread_)->m_pstCurrent )
+#define Thread_GetCurrent( pstThread_ ) ( ((Thread_t*)pstThread_)->pstCurrent )
 
 //---------------------------------------------------------------------------
 /*!
@@ -161,7 +161,7 @@ void Thread_Stop( Thread_t *pstThread_ );
  * \param pstThread_ Pointer to the thread to access/modify
  * \return Priority of the current thread
  */
-#define Thread_GetPriority( pstThread_ )  (((Thread_t*)pstThread_)->m_ucPriority)
+#define Thread_GetPriority( pstThread_ )  (((Thread_t*)pstThread_)->ucPriority)
 
 //---------------------------------------------------------------------------
 /*!
@@ -172,7 +172,7 @@ void Thread_Stop( Thread_t *pstThread_ );
  * \param pstThread_ Pointer to the thread to access/modify
  * \return Priority of the current thread
  */
-#define Thread_GetCurPriority( pstThread_ ) (((Thread_t*)pstThread_)->m_ucCurPriority)
+#define Thread_GetCurPriority( pstThread_ ) (((Thread_t*)pstThread_)->ucCurPriority)
 
 #if KERNEL_USE_QUANTUM
 //---------------------------------------------------------------------------
@@ -182,9 +182,9 @@ void Thread_Stop( Thread_t *pstThread_ );
  *     Set the thread's round-robin execution quantum.
  *
  * \param pstThread_ Pointer to the thread to access/modify
- * \param usQuantum_ Thread's execution quantum (in milliseconds)
+ * \param usQuantu Thread's execution quantum (in milliseconds)
  */
-#define Thread_SetQuantum( pstThread_, usQuantum_ ) ( ((Thread_t*)pstThread_)->m_usQuantum = usQuantum_ )
+#define Thread_SetQuantum( pstThread_, usQuantu ) ( ((Thread_t*)pstThread_)->usQuantum = usQuantu )
 
 //---------------------------------------------------------------------------
 /*!
@@ -195,7 +195,7 @@ void Thread_Stop( Thread_t *pstThread_ );
  * \param pstThread_ Pointer to the thread to access/modify
  * \return  The thread's round-robin timeslice quantum
  */
-#define Thread_GetQuantum( pstThread_ ) ( ((Thread_t*)pstThread_)->m_usQuantum )
+#define Thread_GetQuantum( pstThread_ ) ( ((Thread_t*)pstThread_)->usQuantum )
 #endif
 
 //---------------------------------------------------------------------------
@@ -204,7 +204,7 @@ void Thread_Stop( Thread_t *pstThread_ );
  * \param pstThread_ Pointer to the thread to access/modify
  * \param pstNewList_ Pointer to the threadlist to apply thread ownership
  */
-#define Thread_SetCurrent( pstThread_, pstNewList_ ) ( ((Thread_t*)pstThread_)->m_pstCurrent = pstNewList_)
+#define Thread_SetCurrent( pstThread_, pstNewList_ ) ( ((Thread_t*)pstThread_)->pstCurrent = pstNewList_)
 
 //---------------------------------------------------------------------------
 /*!
@@ -215,7 +215,7 @@ void Thread_Stop( Thread_t *pstThread_ );
  * \param pstThread_ Pointer to the thread to access/modify
  * \param pstNewList_ Pointer to the threadlist to apply thread ownership
  */
-#define Thread_SetOwner( pstThread_, pstNewList_ ) ( ((Thread_t*)pstThread_)->m_pstOwner = pstNewList_ )
+#define Thread_SetOwner( pstThread_, pstNewList_ ) ( ((Thread_t*)pstThread_)->pstOwner = pstNewList_ )
 
 //---------------------------------------------------------------------------
 /*!
@@ -307,7 +307,7 @@ void Thread_Yield( void );
  * \param pstThread_ Pointer to the thread to access/modify
  * \param ucID_ 8-bit Thread_t ID, set by the user
  */
-#define Thread_SetID( pstThread_, ucID_ ) (	((Thread_t*)pstThread_)->m_ucThreadID = ucID_ )
+#define Thread_SetID( pstThread_, ucID_ ) (	((Thread_t*)pstThread_)->ucThreadID = ucID_ )
 
 //---------------------------------------------------------------------------
 /*!
@@ -318,7 +318,7 @@ void Thread_Yield( void );
  * \param pstThread_ Pointer to the thread to access/modify
  * \return Thread_t's 8-bit ID, set by the user
  */
-#define Thread_GetID( pstThread_ ) ( ((Thread_t*)pstThread_)->m_ucThreadID )
+#define Thread_GetID( pstThread_ ) ( ((Thread_t*)pstThread_)->ucThreadID )
 
 //---------------------------------------------------------------------------
 /*!
@@ -345,7 +345,7 @@ K_USHORT Thread_GetStackSlack( Thread_t *pstThread_ );
  * \param pstThread_ Pointer to the thread to access/modify
  * \return A copy of the thread's event flag mask
  */
-#define Thread_GetEventFlagMask( pstThread_ ) (((Thread_t*)pstThread_)->m_usFlagMask)
+#define Thread_GetEventFlagMask( pstThread_ ) (((Thread_t*)pstThread_)->usFlagMask)
 
 //---------------------------------------------------------------------------
 /*!
@@ -353,7 +353,7 @@ K_USHORT Thread_GetStackSlack( Thread_t *pstThread_ );
  * \param pstThread_ Pointer to the thread to access/modify
  * \param usMask_ Binary mask value to set for this thread
  */
-#define Thread_SetEventFlagMask( pstThread_, usMask_ ) (((Thread_t*)pstThread_)->m_usFlagMask = usMask_)
+#define Thread_SetEventFlagMask( pstThread_, usMask_ ) (((Thread_t*)pstThread_)->usFlagMask = usMask_)
 
 //---------------------------------------------------------------------------
 /*!
@@ -361,14 +361,14 @@ K_USHORT Thread_GetStackSlack( Thread_t *pstThread_ );
  * \param eMode_ Event flag operation mode, defines the logical operator
  *               to apply to the event flag.
  */
-#define Thread_SetEventFlagMode( pstThread_, eMode_ ) (((Thread_t*)pstThread_)->m_eFlagMode = eMode_ )
+#define Thread_SetEventFlagMode( pstThread_, eMode_ ) (((Thread_t*)pstThread_)->eFlagMode = eMode_ )
 
 //---------------------------------------------------------------------------
 /*!
  * \brief Thread_GetEventFlagMode Returns the thread's event flag's operating mode
  * \return The thread's event flag mode.
  */
-#define Thread_GetEventFlagMode( pstThread_ ) ( ((Thread_t*)pstThread_)->m_eFlagMode )
+#define Thread_GetEventFlagMode( pstThread_ ) ( ((Thread_t*)pstThread_)->eFlagMode )
 #endif
 
 #if KERNEL_USE_TIMEOUTS || KERNEL_USE_SLEEP
@@ -378,7 +378,7 @@ K_USHORT Thread_GetStackSlack( Thread_t *pstThread_ );
  * \param pstThread_ Pointer to the thread to access/modify
  * \return Return a pointer to the thread's timer object
  */
-#define Thread_GetTimer( pstThread_ ) ( &((Thread_t*)pstThread_)->m_clTimer )
+#define Thread_GetTimer( pstThread_ ) ( &((Thread_t*)pstThread_)->stTimer )
 #endif
 #if KERNEL_USE_TIMEOUTS
 
@@ -391,7 +391,7 @@ K_USHORT Thread_GetStackSlack( Thread_t *pstThread_ );
  * \param pstThread_ Pointer to the thread to access/modify
  * \param bExpired_ true - call expired, false - call did not expire
  */
-#define Thread_SetExpired( pstThread_, bExpired_ ) ( ((Thread_t*)pstThread_)->m_bExpired = bExpired_ )
+#define Thread_SetExpired( pstThread_, bExpired_ ) ( ((Thread_t*)pstThread_)->bExpired = bExpired_ )
 
 //---------------------------------------------------------------------------
 /*!
@@ -402,7 +402,7 @@ K_USHORT Thread_GetStackSlack( Thread_t *pstThread_ );
  * \param pstThread_ Pointer to the thread to access/modify
  * \return true - call expired, false - call did not expire
  */
-#define Thread_GetExpired( pstThread_ )	( ((Thread_t*)pstThread_)->m_bExpired )
+#define Thread_GetExpired( pstThread_ )	( ((Thread_t*)pstThread_)->bExpired )
 #endif
 
 #if KERNEL_USE_IDLE_FUNC
@@ -426,7 +426,7 @@ void Thread_InitIdle( Thread_t *pstThread_ );
  * \param pstThread_ Pointer to the thread to access/modify
  * \return ThreadState_t representing the thread's current state
  */
-#define Thread_GetState( pstThread_ ) ( ((Thread_t*)pstThread_)->m_eState )
+#define Thread_GetState( pstThread_ ) ( ((Thread_t*)pstThread_)->eState )
 
 //---------------------------------------------------------------------------
 /*!
@@ -436,7 +436,7 @@ void Thread_InitIdle( Thread_t *pstThread_ );
  * \param pstThread_ Pointer to the thread to access/modify
  * \param eState_ New thread state to set.
  */
-#define Thread_SetState( pstThread_, eState_ ) ( ((Thread_t*)pstThread_)->m_eState = eState_ )
+#define Thread_SetState( pstThread_, eState_ ) ( ((Thread_t*)pstThread_)->eState = eState_ )
 
 //---------------------------------------------------------------------------
 /*!
@@ -475,26 +475,26 @@ typedef struct
     LinkListNode_t *prev;
 
     //! Pointer to the top of the thread's stack
-    K_WORD *m_pwStackTop;
+    K_WORD *pwStackTop;
 
     //! Pointer to the thread's stack
-    K_WORD *m_pwStack;
+    K_WORD *pwStack;
 
     //! Thread_t ID
-    K_UCHAR m_ucThreadID;
+    K_UCHAR ucThreadID;
 
     //! Default priority of the thread
-    K_UCHAR m_ucPriority;
+    K_UCHAR ucPriority;
 
     //! Current priority of the thread (priority inheritence)
-    K_UCHAR m_ucCurPriority;
+    K_UCHAR ucCurPriority;
 
     //! Enum indicating the thread's current state
-    ThreadState_t m_eState;
+    ThreadState_t eState;
 
 #if KERNEL_USE_THREADNAME
     //! Thread_t name
-    const K_CHAR *m_szName;
+    const K_CHAR *szName;
 #endif
 
 } FakeThread_t;

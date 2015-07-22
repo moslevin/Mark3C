@@ -49,7 +49,7 @@ See license.txt for more information
             while(1)
             {
                 // Grab a message from the global message pool
-                Message_t *tx_message = GlobalMessagePool::Pop();
+                Message_t *tx_message = GlobalMessagePool_Pop();
                 
                 // Set the message data/parameters
                 tx_message->SetCode( 1234 );
@@ -57,7 +57,7 @@ See license.txt for more information
                 
                 // Send the message on the queue.
                 my_queue.Send( tx_message );
-                Thread_t::Sleep(10);
+                Thread_t_Sleep(10);
             }
         }
         
@@ -71,7 +71,7 @@ See license.txt for more information
                 // Do something with the message data...
                 
                 // Return back into the pool when done
-                GlobalMessagePool::Push(rx_message);                
+                GlobalMessagePool_Push(rx_message);                
             }
         }
     \endcode
@@ -103,13 +103,13 @@ See license.txt for more information
 typedef struct 
 {
 	// Inherit from LinkListNode_t -- must be first.
-	LinkListNode_t clNode;
+    LinkListNode_t stNode;
 	
 	//! Pointer to the message data
-	void *m_pvData;
+    void *pvData;
 	    
 	//! Message_t code, providing context for the message
-	K_USHORT m_usCode;
+    K_USHORT usCode;
 } Message_t;
 
 //---------------------------------------------------------------------------
@@ -199,10 +199,10 @@ Message_t *GlobalMessagePool_Pop( void );
 typedef struct 
 {
 	//! Counting Semaphore_t used to manage thread blocking
-	Semaphore_t m_clSemaphore;
+    Semaphore_t stSemaphore;
 	
 	//! List object used to store messages
-	DoubleLinkList_t m_clLinkList;
+    DoubleLinkList_t stLinkList;
 } MessageQueue_t;
 
 //---------------------------------------------------------------------------

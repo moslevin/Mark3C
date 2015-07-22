@@ -50,9 +50,9 @@ See license.txt for more information
 typedef struct  
 {
 	// Inherit from BlockingObject -- must go first
-	ThreadList_t clList;
+    ThreadList_t stList;
 	
-	K_USHORT m_usSetMask;       //!< Event flags currently set in this object
+    K_USHORT usSetMask;       //!< Event flags currently set in this object
 } EventFlag_t;
 
 /*!

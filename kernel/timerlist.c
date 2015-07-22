@@ -44,21 +44,21 @@ See license.txt for more information
 */
 
 // Inherit from DoubleLinkList_t -- must be first!!
-static DoubleLinkList_t m_clTimerList;
+static DoubleLinkList_t stTimerList;
 
 //! The time (in system clock ticks) of the next wakeup event
-static K_ULONG m_ulNextWakeup;
+static K_ULONG ulNextWakeup;
 
 //! Whether or not the timer is active
-static K_UCHAR m_bTimerActive;
+static K_UCHAR bTimerActive;
 
 
 //---------------------------------------------------------------------------
 void TimerList_Init(void)
 {
-    m_bTimerActive = 0;    
-    m_ulNextWakeup = 0;    
-	LinkList_Init( (LinkList_t*)&m_clTimerList );
+    bTimerActive = 0;    
+    ulNextWakeup = 0;    
+	LinkList_Init( (LinkList_t*)&stTimerList );
 }
 
 //---------------------------------------------------------------------------
@@ -72,40 +72,40 @@ void TimerList_Add(Timer_t *pstListNode_)
     CS_ENTER();
 
 #if KERNEL_TIMERS_TICKLESS
-    if (LinkList_GetHead( (LinkList_t*)&m_clTimerList ) == NULL)
+    if (LinkList_GetHead( (LinkList_t*)&stTimerList ) == NULL)
     {
         bStart = 1;
     }
 #endif
 
     LinkListNode_Clear( (LinkListNode_t*)pstListNode_ );
-    DoubleLinkList_Add( (DoubleLinkList_t*)&m_clTimerList, (LinkListNode_t*)pstListNode_);
+    DoubleLinkList_Add( (DoubleLinkList_t*)&stTimerList, (LinkListNode_t*)pstListNode_);
     
     // Set the initial timer value
-    pstListNode_->m_ulTimeLeft = pstListNode_->m_ulInterval;    
+    pstListNode_->ulTimeLeft = pstListNode_->ulInterval;    
 
 #if KERNEL_TIMERS_TICKLESS
     if (!bStart)
     {
         // If the new interval is less than the amount of time remaining...
-        lDelta = KernelTimer_TimeToExpiry() - pstListNode_->m_ulInterval;
+        lDelta = KernelTimer_TimeToExpiry() - pstListNode_->ulInterval;
     
         if (lDelta > 0)
         {
             // Set the new expiry time on the timer.
-            m_ulNextWakeup = KernelTimer_SubtractExpiry((K_ULONG)lDelta);
+            ulNextWakeup = KernelTimer_SubtractExpiry((K_ULONG)lDelta);
         }
     }
     else    
     {
-        m_ulNextWakeup = pstListNode_->m_ulInterval;
-        KernelTimer_SetExpiry(m_ulNextWakeup);
+        ulNextWakeup = pstListNode_->ulInterval;
+        KernelTimer_SetExpiry(ulNextWakeup);
         KernelTimer_Start();
     }
 #endif
 
     // Set the timer as active.
-    pstListNode_->m_ucFlags |= TIMERLIST_FLAG_ACTIVE;    
+    pstListNode_->ucFlags |= TIMERLIST_FLAG_ACTIVE;    
     CS_EXIT();
 }
 
@@ -114,10 +114,10 @@ void TimerList_Remove(Timer_t *pstLinkListNode_)
 {
     CS_ENTER();
     
-    DoubleLinkList_Remove( (DoubleLinkList_t*)&m_clTimerList, (LinkListNode_t*)pstLinkListNode_ );
+    DoubleLinkList_Remove( (DoubleLinkList_t*)&stTimerList, (LinkListNode_t*)pstLinkListNode_ );
 
 #if KERNEL_TIMERS_TICKLESS
-    if ( LinkList_GetHead( (LinkList_t*)&m_clTimerList ) == NULL )
+    if ( LinkList_GetHead( (LinkList_t*)&stTimerList ) == NULL )
     {
         KernelTimer_Stop();
     }
@@ -139,7 +139,7 @@ void TimerList_Process(void)
     Timer_t *pstPrev;
 
 #if KERNEL_USE_QUANTUM
-    Quantum_SetInTimer();
+    QuantuSetInTimer();
 #endif
 #if KERNEL_TIMERS_TICKLESS
     // Clear the timer and its expiry time - keep it running though
@@ -147,7 +147,7 @@ void TimerList_Process(void)
     do 
     {        
 #endif
-        pstNode = (Timer_t*)LinkList_GetHead( (LinkList_t*)&m_clTimerList );
+        pstNode = (Timer_t*)LinkList_GetHead( (LinkList_t*)&stTimerList );
         pstPrev = NULL;
 
 #if KERNEL_TIMERS_TICKLESS
@@ -159,36 +159,36 @@ void TimerList_Process(void)
         while (pstNode)
         {        
             // Active timers only...
-            if (pstNode->m_ucFlags & TIMERLIST_FLAG_ACTIVE)
+            if (pstNode->ucFlags & TIMERLIST_FLAG_ACTIVE)
             {
                 // Did the timer expire?
 #if KERNEL_TIMERS_TICKLESS
-                if (pstNode->m_ulTimeLeft <= m_ulNextWakeup)
+                if (pstNode->ulTimeLeft <= ulNextWakeup)
 #else
-                pstNode->m_ulTimeLeft--;
-                if (0 == pstNode->m_ulTimeLeft)
+                pstNode->ulTimeLeft--;
+                if (0 == pstNode->ulTimeLeft)
 #endif
                 {
                     // Yes - set the "callback" flag - we'll execute the callbacks later
-                    pstNode->m_ucFlags |= TIMERLIST_FLAG_CALLBACK;
+                    pstNode->ucFlags |= TIMERLIST_FLAG_CALLBACK;
                                 
-                    if (pstNode->m_ucFlags & TIMERLIST_FLAG_ONE_SHOT)
+                    if (pstNode->ucFlags & TIMERLIST_FLAG_ONE_SHOT)
                     {
                         // If this was a one-shot timer, deactivate the timer.
-                        pstNode->m_ucFlags |= TIMERLIST_FLAG_EXPIRED;
-                        pstNode->m_ucFlags &= ~TIMERLIST_FLAG_ACTIVE;                    
+                        pstNode->ucFlags |= TIMERLIST_FLAG_EXPIRED;
+                        pstNode->ucFlags &= ~TIMERLIST_FLAG_ACTIVE;                    
                     }
                     else
                     {
                         // Reset the interval timer.
                         //!ToDo - figure out if we need to deal with any overtime here.
                         // I think we're good though...                        
-                        pstNode->m_ulTimeLeft = pstNode->m_ulInterval;
+                        pstNode->ulTimeLeft = pstNode->ulInterval;
                         
 #if KERNEL_TIMERS_TICKLESS
                         // If the time remaining (plus the length of the tolerance interval)
                         // is less than the next expiry interval, set the next expiry interval.
-                        K_ULONG ulTmp = pstNode->m_ulTimeLeft + pstNode->m_ulTimerTolerance;
+                        K_ULONG ulTmp = pstNode->ulTimeLeft + pstNode->ulTimerTolerance;
 
                         if (ulTmp < ulNewExpiry)
                         {
@@ -201,10 +201,10 @@ void TimerList_Process(void)
                 else
                 {
                     // Not expiring, but determine how K_LONG to run the next timer interval for.
-                    pstNode->m_ulTimeLeft -= m_ulNextWakeup;
-                    if (pstNode->m_ulTimeLeft < ulNewExpiry)
+                    pstNode->ulTimeLeft -= ulNextWakeup;
+                    if (pstNode->ulTimeLeft < ulNewExpiry)
                     {
-                        ulNewExpiry = pstNode->m_ulTimeLeft;
+                        ulNewExpiry = pstNode->ulTimeLeft;
                     }
                 }
 #endif
@@ -213,20 +213,20 @@ void TimerList_Process(void)
         }
     
         // Process the expired timers callbacks.
-        pstNode = (Timer_t*)LinkList_GetHead( (LinkList_t*)&m_clTimerList );
+        pstNode = (Timer_t*)LinkList_GetHead( (LinkList_t*)&stTimerList );
         while (pstNode)
         {
             pstPrev = NULL;
         
             // If the timer expired, run the callbacks now.
-            if (pstNode->m_ucFlags & TIMERLIST_FLAG_CALLBACK)
+            if (pstNode->ucFlags & TIMERLIST_FLAG_CALLBACK)
             {
                 // Run the callback. these callbacks must be very fast...
-                pstNode->m_pfCallback( pstNode->m_pstOwner, pstNode->m_pvData );
-                pstNode->m_ucFlags &= ~TIMERLIST_FLAG_CALLBACK;
+                pstNode->pfCallback( pstNode->pstOwner, pstNode->pvData );
+                pstNode->ucFlags &= ~TIMERLIST_FLAG_CALLBACK;
             
                 // If this was a one-shot timer, let's remove it.
-                if (pstNode->m_ucFlags & TIMERLIST_FLAG_ONE_SHOT)
+                if (pstNode->ucFlags & TIMERLIST_FLAG_ONE_SHOT)
                 {
                     pstPrev = pstNode;
                 }
@@ -246,7 +246,7 @@ void TimerList_Process(void)
         ulOvertime = KernelTimer_GetOvertime();
         
         if( ulOvertime >= ulNewExpiry ) {
-            m_ulNextWakeup = ulOvertime;
+            ulNextWakeup = ulOvertime;
             bContinue = 1;
         }
         
@@ -266,12 +266,12 @@ void TimerList_Process(void)
         // Update the timer with the new "Next Wakeup" value, plus whatever
         // overtime has accumulated since the last time we called this handler
 
-        m_ulNextWakeup = KernelTimer_SetExpiry(ulNewExpiry + ulOvertime);
+        ulNextWakeup = KernelTimer_SetExpiry(ulNewExpiry + ulOvertime);
     }
 #endif
 
 #if KERNEL_USE_QUANTUM
-    Quantum_ClearInTimer();
+    QuantustearInTimer();
 #endif
 }
 

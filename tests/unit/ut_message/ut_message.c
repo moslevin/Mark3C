@@ -34,15 +34,15 @@ static volatile K_UCHAR ucPassCount = 0;
 
 void MsgConsumer(void *unused_)
 {
-    Message_t *pclMsg;
+    Message_t *pstMsg;
     K_UCHAR i;
 
     for (i = 0; i < 20; i++)
     {
-        pclMsg = MessageQueue_Receive( &stMsgQ );
+        pstMsg = MessageQueue_Receive( &stMsgQ );
         ucPassCount = 0;
 
-        if (pclMsg)
+        if (pstMsg)
         {
             ucPassCount++;
         }
@@ -55,31 +55,31 @@ void MsgConsumer(void *unused_)
         switch(i)
         {
             case 0:
-                if (0 == Message_GetCode( pclMsg ))
+                if (0 == Message_GetCode( pstMsg ))
                 {
                     ucPassCount++;
                 }
-                if (0 == Message_GetData( pclMsg ))
+                if (0 == Message_GetData( pstMsg ))
                 {
                     ucPassCount++;
                 }
                 break;
             case 1:
-                if (1337 == (Message_GetCode( pclMsg )) )
+                if (1337 == (Message_GetCode( pstMsg )) )
                 {
                     ucPassCount++;
                 }
-                if (7331 == (K_USHORT)(Message_GetData( pclMsg )))
+                if (7331 == (K_USHORT)(Message_GetData( pstMsg )))
                 {
                     ucPassCount++;
                 }
 
             case 2:
-                if (0xA0A0== (Message_GetCode( pclMsg )) )
+                if (0xA0A0== (Message_GetCode( pstMsg )) )
                 {
                     ucPassCount++;
                 }
-                if (0xC0C0 == (K_USHORT)(Message_GetData( pclMsg )))
+                if (0xC0C0 == (K_USHORT)(Message_GetData( pstMsg )))
                 {
                     ucPassCount++;
                 }
@@ -89,7 +89,7 @@ void MsgConsumer(void *unused_)
             default:
                 break;
         }
-        GlobalMessagePool_Push(pclMsg);
+        GlobalMessagePool_Push(pstMsg);
     }
 }
 
@@ -103,7 +103,7 @@ TEST(ut_message_tx_rx)
     // message queue.  This test also relies on priority scheduling working
     // as expected.
 
-    Message_t *pclMsg;
+    Message_t *pstMsg;
 
     Thread_Init( &stMsgThread, aucMsgStack, MSG_STACK_SIZE, 7, MsgConsumer, 0);
 
@@ -112,36 +112,36 @@ TEST(ut_message_tx_rx)
     Thread_Start( &stMsgThread );
 
     // Get a message from the pool
-    pclMsg = GlobalMessagePool_Pop();
-    EXPECT_FAIL_FALSE( pclMsg );
+    pstMsg = GlobalMessagePool_Pop();
+    EXPECT_FAIL_FALSE( pstMsg );
 
     // Send the message to the consumer thread
-    Message_SetData( pclMsg, NULL );
-    Message_SetCode( pclMsg, 0 );
+    Message_SetData( pstMsg, NULL );
+    Message_SetCode( pstMsg, 0 );
 
-    MessageQueue_Send( &stMsgQ, pclMsg );
+    MessageQueue_Send( &stMsgQ, pstMsg );
 
     EXPECT_EQUALS(ucPassCount, 3);
 
-    pclMsg = GlobalMessagePool_Pop();
-    EXPECT_FAIL_FALSE( pclMsg );
+    pstMsg = GlobalMessagePool_Pop();
+    EXPECT_FAIL_FALSE( pstMsg );
 
     // Send the message to the consumer thread
-    Message_SetCode( pclMsg, 1337);
-    Message_SetData( pclMsg, (void*)7331);
+    Message_SetCode( pstMsg, 1337);
+    Message_SetData( pstMsg, (void*)7331);
 
-    MessageQueue_Send( &stMsgQ, pclMsg);
+    MessageQueue_Send( &stMsgQ, pstMsg);
 
     EXPECT_EQUALS(ucPassCount, 3);
 
-    pclMsg = GlobalMessagePool_Pop();
-    EXPECT_FAIL_FALSE( pclMsg );
+    pstMsg = GlobalMessagePool_Pop();
+    EXPECT_FAIL_FALSE( pstMsg );
 
     // Send the message to the consumer thread
-    Message_SetCode( pclMsg, 0xA0A0 );
-    Message_SetData( pclMsg, (void*)0xC0C0 );
+    Message_SetCode( pstMsg, 0xA0A0 );
+    Message_SetData( pstMsg, (void*)0xC0C0 );
 
-    MessageQueue_Send( &stMsgQ, pclMsg );
+    MessageQueue_Send( &stMsgQ, pstMsg );
 
     EXPECT_EQUALS(ucPassCount, 3);
 
@@ -171,46 +171,46 @@ static volatile K_BOOL bTimedOut = false;
 //===========================================================================
 void MsgTimed(void *unused)
 {
-    Message_t *pclRet;
+    Message_t *pstRet;
     ucPassCount = 0;
-    pclRet = MessageQueue_TimedReceive( &stMsgQ, 10);
-    if (0 == pclRet)
+    pstRet = MessageQueue_TimedReceive( &stMsgQ, 10);
+    if (0 == pstRet)
     {
         ucPassCount++;
     }
     else
     {
-        GlobalMessagePool_Push(pclRet);
+        GlobalMessagePool_Push(pstRet);
     }
 
-    pclRet = MessageQueue_TimedReceive( &stMsgQ, 1000);
-    if (0 != pclRet)
+    pstRet = MessageQueue_TimedReceive( &stMsgQ, 1000);
+    if (0 != pstRet)
     {
         ucPassCount++;
     }
     else
     {
-        GlobalMessagePool_Push(pclRet);
+        GlobalMessagePool_Push(pstRet);
     }
 
     while(1)
     {
-        pclRet = MessageQueue_Receive( &stMsgQ );
-        GlobalMessagePool_Push(pclRet);
+        pstRet = MessageQueue_Receive( &stMsgQ );
+        GlobalMessagePool_Push(pstRet);
     }
  }
 
 //===========================================================================
 TEST(ut_message_timed_rx)
 {
-    Message_t *pclMsg;
+    Message_t *pstMsg;
 
-    pclMsg = GlobalMessagePool_Pop();
-    EXPECT_FAIL_FALSE( pclMsg );
+    pstMsg = GlobalMessagePool_Pop();
+    EXPECT_FAIL_FALSE( pstMsg );
 
     // Send the message to the consumer thread
-    Message_SetData( pclMsg, NULL );
-    Message_SetCode( pclMsg, 0);
+    Message_SetData( pstMsg, NULL );
+    Message_SetCode( pstMsg, 0);
 
     // Test - Verify that the timed blocking in the message queues works
     Thread_Init( &stMsgThread, aucMsgStack, MSG_STACK_SIZE, 7, MsgTimed, 0);
@@ -221,11 +221,11 @@ TEST(ut_message_timed_rx)
     EXPECT_EQUALS( ucPassCount, 1 );
 
     // other thread has a timeout set... Don't leave them waiting!
-    MessageQueue_Send( &stMsgQ, pclMsg );
+    MessageQueue_Send( &stMsgQ, pstMsg );
 
     EXPECT_EQUALS( ucPassCount, 2 );
 
-    MessageQueue_Send( &stMsgQ, pclMsg );
+    MessageQueue_Send( &stMsgQ, pstMsg );
 
     Thread_Exit( &stMsgThread );
 }

@@ -43,8 +43,8 @@ typedef struct
 	// Inherit from BlockingObject -- must go first!!
 	ThreadList_t	clBlockList;
 	
-	K_USHORT m_usValue;         //!< Current count held by the Semaphore_t
-	K_USHORT m_usMaxValue;      //!< Maximum count that can be held by this Semaphore_t
+	K_USHORT usValue;         //!< Current count held by the Semaphore_t
+	K_USHORT usMaxValue;      //!< Maximum count that can be held by this Semaphore_t
 } Semaphore_t;
 
 //---------------------------------------------------------------------------
@@ -57,7 +57,7 @@ typedef struct
     \param usInitVal_ Initial value held by the Semaphore_t
     \param usMaxVal_ Maximum value for the Semaphore_t
 */
-void Semaphore_Init( Semaphore_t *pstSem_, K_USHORT usInitVal_, K_USHORT usMaxVal_);
+void Semaphore_Init( Semaphore_t *pstSe, K_USHORT usInitVal_, K_USHORT usMaxVal_);
     
 //---------------------------------------------------------------------------
 /*!
@@ -68,7 +68,7 @@ void Semaphore_Init( Semaphore_t *pstSem_, K_USHORT usInitVal_, K_USHORT usMaxVa
     \return true if the Semaphore_t was posted, false if the count
             is already maxed out.
 */
-K_BOOL Semaphore_Post( Semaphore_t *pstSem_ );
+K_BOOL Semaphore_Post( Semaphore_t *pstSe );
 
 //---------------------------------------------------------------------------
 /*!
@@ -77,7 +77,7 @@ K_BOOL Semaphore_Post( Semaphore_t *pstSem_ );
     Decrement the Semaphore_t count.  If the count is zero,
     the thread will block until the Semaphore_t is pended.        
 */
-void Semaphore_Pend( Semaphore_t *pstSem_ );
+void Semaphore_Pend( Semaphore_t *pstSe );
     
 //---------------------------------------------------------------------------
 /*!
@@ -91,7 +91,7 @@ void Semaphore_Pend( Semaphore_t *pstSem_ );
 		
 	\return The current Semaphore_t counter value.
 */
-K_USHORT Semaphore_GetCount( Semaphore_t *pstSem_ );
+K_USHORT Semaphore_GetCount( Semaphore_t *pstSe );
 	
 #if KERNEL_USE_TIMEOUTS
 //---------------------------------------------------------------------------
@@ -106,7 +106,7 @@ K_USHORT Semaphore_GetCount( Semaphore_t *pstSem_ );
 	\return true - Semaphore_t was acquired before the timeout
 			false - timeout occurred before the Semaphore_t was claimed.
 */
-K_BOOL Semaphore_TimedPend( Semaphore_t *pstSem_, K_ULONG ulWaitTimeMS_);
+K_BOOL Semaphore_TimedPend( Semaphore_t *pstSe, K_ULONG ulWaitTimeMS_);
 	
 #endif	
 	

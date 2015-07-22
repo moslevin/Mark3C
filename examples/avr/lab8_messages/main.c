@@ -41,7 +41,7 @@ IPC even more flexibility.
 // defines a thread object, stack (in word-array form), and the entry-point
 // function used by the application thread.
 #define APP1_STACK_SIZE      (320/sizeof(K_WORD))
-static Thread_t  clApp1Thread;
+static Thread_t  stApp1Thread;
 static K_WORD  awApp1Stack[APP1_STACK_SIZE];
 static void    App1Main(void *unused_);
 
@@ -50,12 +50,12 @@ static void    App1Main(void *unused_);
 // defines a thread object, stack (in word-array form), and the entry-point
 // function used by the application thread.
 #define APP2_STACK_SIZE      (320/sizeof(K_WORD))
-static Thread_t  clApp2Thread;
+static Thread_t  stApp2Thread;
 static K_WORD  awApp2Stack[APP2_STACK_SIZE];
 static void    App2Main(void *unused_);
 
 //---------------------------------------------------------------------------
-static MessageQueue_t clMsgQ;
+static MessageQueue_t stMsgQ;
 
 //---------------------------------------------------------------------------
 int main(void)
@@ -63,13 +63,13 @@ int main(void)
     // See the annotations in previous labs for details on init.
     Kernel_Init();
 
-	Thread_Init( &clApp1Thread, awApp1Stack,  APP1_STACK_SIZE,  1, App1Main,  0);
-    Thread_Init( &clApp2Thread, awApp2Stack,  APP2_STACK_SIZE,  1, App2Main,  0);
+    Thread_Init( &stApp1Thread, awApp1Stack,  APP1_STACK_SIZE,  1, App1Main,  0);
+    Thread_Init( &stApp2Thread, awApp2Stack,  APP2_STACK_SIZE,  1, App2Main,  0);
 
-	Thread_Start( &clApp1Thread );
-	Thread_Start( &clApp2Thread );
+    Thread_Start( &stApp1Thread );
+    Thread_Start( &stApp2Thread );
 
-    MessageQueue_Init( &clMsgQ );
+    MessageQueue_Init( &stMsgQ );
 
     Kernel_Start();
 
@@ -88,15 +88,15 @@ void App1Main(void *unused_)
         // for a message to arrive in the queue.
 
         // Get the message object
-        Message_t *pclMsg = GlobalMessagePool_Pop();
+        Message_t *pstMsg = GlobalMessagePool_Pop();
 
         // Set the message object's data (contrived in this example)
-        Message_SetCode( pclMsg, 0x1337);
+        Message_SetCode( pstMsg, 0x1337);
         usData++;
-        Message_SetData( pclMsg, &usData);
+        Message_SetData( pstMsg, &usData);
 
         // Send the message to the shared message queue
-        MessageQueue_Send( &clMsgQ, pclMsg);
+        MessageQueue_Send( &stMsgQ, pstMsg);
 
         // Wait before sending another message.
         Thread_Sleep(20);
@@ -120,13 +120,13 @@ void App2Main(void *unused_)
         // this thread receives the message, it is "owned" by the thread, and
         // must be returned back to its source message pool when it is no longer
         // needed.
-        Message_t *pclMsg = MessageQueue_Receive( &clMsgQ );
+        Message_t *pstMsg = MessageQueue_Receive( &stMsgQ );
 
         // We received a message, now print out its information
         KernelAware_Print("Received Message\n");
-        KernelAware_Trace1(0, __LINE__, Message_GetCode( pclMsg ), *((K_USHORT*)Message_GetData( pclMsg )));
+        KernelAware_Trace1(0, __LINE__, Message_GetCode( pstMsg ), *((K_USHORT*)Message_GetData( pstMsg )));
 
         // Done with the message, return it back to the global message queue.
-        GlobalMessagePool_Push(pclMsg);
+        GlobalMessagePool_Push(pstMsg);
     }
 }

@@ -42,9 +42,9 @@ static K_WORD aucTestStack2[TEST_STACK2_SIZE];
 static K_WORD aucTestStack3[TEST_STACK3_SIZE];
 
 //---------------------------------------------------------------------------
-void TestSemThread(Semaphore_t *pstSem_)
+void TestSemThread(Semaphore_t *pstSe)
 {
-    Semaphore_Pend( pstSem_ );
+    Semaphore_Pend( pstSe );
     if (ucTestVal != 0x12)
     {
         ucTestVal = 0xFF;
@@ -54,7 +54,7 @@ void TestSemThread(Semaphore_t *pstSem_)
         ucTestVal = 0x21;
     }
 
-    Semaphore_Pend( pstSem_ );
+    Semaphore_Pend( pstSe );
     if (ucTestVal != 0x32)
     {
         ucTestVal = 0xFF;
@@ -64,7 +64,7 @@ void TestSemThread(Semaphore_t *pstSem_)
         ucTestVal = 0x23;
     }
 
-    Semaphore_Pend( pstSem_ );
+    Semaphore_Pend( pstSe );
     if (ucTestVal != 0x45)
     {
         ucTestVal = 0xFF;
@@ -73,7 +73,7 @@ void TestSemThread(Semaphore_t *pstSem_)
     {
         ucTestVal = 0x54;
     }
-    Semaphore_Pend( pstSem_ );
+    Semaphore_Pend( pstSe );
 }
 //---------------------------------------------------------------------------
 // Binary semaphore test:
@@ -115,19 +115,19 @@ TEST(ut_sanity_sem)
 TEST_END
 
 //---------------------------------------------------------------------------
-void TimedSemaphoreThread_Short( Semaphore_t *pstSem_ )
+void TimedSemaphoreThread_Short( Semaphore_t *pstSe )
 {
     Thread_Sleep(10);
-    Semaphore_Post( pstSem_ );
+    Semaphore_Post( pstSe );
 
     Thread_Exit( Scheduler_GetCurrentThread() );
 }
 
 //---------------------------------------------------------------------------
-void TimedSemaphoreThread_Long( Semaphore_t *pstSem_ )
+void TimedSemaphoreThread_Long( Semaphore_t *pstSe )
 {
     Thread_Sleep(20);
-    Semaphore_Post( pstSem_ );
+    Semaphore_Post( pstSe );
     Thread_Exit( Scheduler_GetCurrentThread() );
 }
 
@@ -201,9 +201,9 @@ TEST(ut_sanity_sleep)
 TEST_END
 
 //---------------------------------------------------------------------------
-void TestMutexThread(Mutex_t *pclMutex_)
+void TestMutexThread(Mutex_t *pstMutex_)
 {
-    Mutex_Claim( pclMutex_ );
+    Mutex_Claim( pstMutex_ );
     if (ucTestVal != 0xDC)
     {
         ucTestVal = 0xAA;
@@ -212,28 +212,28 @@ void TestMutexThread(Mutex_t *pclMutex_)
     {
         ucTestVal = 0xAC;
     }
-    Mutex_Release( pclMutex_ );
+    Mutex_Release( pstMutex_ );
 
     Thread_Exit( Scheduler_GetCurrentThread() );
 }
 
 
 //---------------------------------------------------------------------------
-void TestTimedMutexThreadShort(Mutex_t *pclMutex_)
+void TestTimedMutexThreadShort(Mutex_t *pstMutex_)
 {
-    Mutex_Claim( pclMutex_ );
+    Mutex_Claim( pstMutex_ );
     Thread_Sleep( 10 );
-    Mutex_Release( pclMutex_ );
+    Mutex_Release( pstMutex_ );
 
     Thread_Exit( Scheduler_GetCurrentThread() );
 }
 
 //---------------------------------------------------------------------------
-void TestTimedMutexThreadLong(Mutex_t *pclMutex_)
+void TestTimedMutexThreadLong(Mutex_t *pstMutex_)
 {
-    Mutex_Claim( pclMutex_ );
+    Mutex_Claim( pstMutex_ );
     Thread_Sleep( 20 );
-    Mutex_Release( pclMutex_ );
+    Mutex_Release( pstMutex_ );
 
     Thread_Exit( Scheduler_GetCurrentThread() );
 }
@@ -280,16 +280,16 @@ TEST(ut_sanity_mutex)
 TEST_END
 
 //---------------------------------------------------------------------------
-void TimedMessageThread(MessageQueue_t *pclMsgQ_)
+void TimedMessageThread(MessageQueue_t *pstMsgQ_)
 {
-    Message_t *pclMsg = GlobalMessagePool_Pop();
+    Message_t *pstMsg = GlobalMessagePool_Pop();
     
-    Message_SetData( pclMsg, NULL );
-    Message_SetCode( pclMsg, 0 );
+    Message_SetData( pstMsg, NULL );
+    Message_SetCode( pstMsg, 0 );
     
     Thread_Sleep(10);
     
-    MessageQueue_Send( pclMsgQ_, pclMsg );
+    MessageQueue_Send( pstMsgQ_, pstMsg );
     
     Thread_Exit( Scheduler_GetCurrentThread() );
 }
@@ -298,29 +298,29 @@ void TimedMessageThread(MessageQueue_t *pclMsgQ_)
 //void UT_TimedMessageTest(void)
 TEST(ut_sanity_timed_msg)
 {
-    Message_t *pclMsg;
+    Message_t *pstMsg;
 
     Thread_Init( &stTestThread1, aucTestStack1, TEST_STACK1_SIZE, 2, (ThreadEntry_t)TimedMessageThread, (void*)&stMsgQ1);
     Thread_Start( &stTestThread1 );
     
-    pclMsg = MessageQueue_TimedReceive( &stMsgQ1, 15 );
+    pstMsg = MessageQueue_TimedReceive( &stMsgQ1, 15 );
     
-    if (!pclMsg)
+    if (!pstMsg)
     {
         EXPECT_TRUE(0);
     }
     else
     {
         EXPECT_TRUE(1);
-        GlobalMessagePool_Push(pclMsg);
+        GlobalMessagePool_Push(pstMsg);
     }
 
-    pclMsg = MessageQueue_TimedReceive( &stMsgQ1, 10 );
+    pstMsg = MessageQueue_TimedReceive( &stMsgQ1, 10 );
     
-    if (pclMsg)
+    if (pstMsg)
     {
         EXPECT_TRUE(0);
-        GlobalMessagePool_Push(pclMsg);
+        GlobalMessagePool_Push(pstMsg);
     }
     else
     {
@@ -332,80 +332,80 @@ TEST_END
 //---------------------------------------------------------------------------
 void TestMessageTest(void *pvArg)
 {
-    Message_t *pclMesg;
+    Message_t *pstMesg;
     bool bPass = true;
 
-    pclMesg = MessageQueue_Receive( &stMsgQ2 );
+    pstMesg = MessageQueue_Receive( &stMsgQ2 );
 
-    if (Message_GetCode( pclMesg ) != 0x11)
+    if (Message_GetCode( pstMesg ) != 0x11)
     {
         bPass = false;
     }
 
-    GlobalMessagePool_Push(pclMesg);
+    GlobalMessagePool_Push(pstMesg);
     
-    pclMesg = GlobalMessagePool_Pop();
+    pstMesg = GlobalMessagePool_Pop();
     
-    Message_SetCode( pclMesg, 0x22 );
+    Message_SetCode( pstMesg, 0x22 );
 
-    MessageQueue_Send( &stMsgQ1, pclMesg );
+    MessageQueue_Send( &stMsgQ1, pstMesg );
     
-    pclMesg = MessageQueue_Receive( &stMsgQ2 );
-    if(Message_GetCode( pclMesg ) != 0xAA)
+    pstMesg = MessageQueue_Receive( &stMsgQ2 );
+    if(Message_GetCode( pstMesg ) != 0xAA)
     {
         bPass = false;
     }
 
-    GlobalMessagePool_Push(pclMesg);
+    GlobalMessagePool_Push(pstMesg);
     
-    pclMesg = MessageQueue_Receive( &stMsgQ2 );
-    if(Message_GetCode( pclMesg ) != 0xBB)
+    pstMesg = MessageQueue_Receive( &stMsgQ2 );
+    if(Message_GetCode( pstMesg ) != 0xBB)
     {
         bPass = false;
     }
 
-    GlobalMessagePool_Push(pclMesg);
+    GlobalMessagePool_Push(pstMesg);
 
-    pclMesg = MessageQueue_Receive( &stMsgQ2 );
-    if(Message_GetCode( pclMesg ) != 0xCC)
+    pstMesg = MessageQueue_Receive( &stMsgQ2 );
+    if(Message_GetCode( pstMesg ) != 0xCC)
     {
         bPass = false;
     }
 
-    GlobalMessagePool_Push(pclMesg);
+    GlobalMessagePool_Push(pstMesg);
 
-    pclMesg = GlobalMessagePool_Pop();
+    pstMesg = GlobalMessagePool_Pop();
     if (bPass)
     {
-        Message_SetCode( pclMesg, 0xDD );
+        Message_SetCode( pstMesg, 0xDD );
     }
     else
     {
-        Message_SetCode( pclMesg, 0xFF );
+        Message_SetCode( pstMesg, 0xFF );
     }
-    MessageQueue_Send( &stMsgQ1, pclMesg );
+    MessageQueue_Send( &stMsgQ1, pstMesg );
 
-    pclMesg = GlobalMessagePool_Pop();
+    pstMesg = GlobalMessagePool_Pop();
     if (bPass)
     {
-        Message_SetCode( pclMesg, 0xEE );
+        Message_SetCode( pstMesg, 0xEE );
     }
     else
     {
-        Message_SetCode( pclMesg, 0x00 );
+        Message_SetCode( pstMesg, 0x00 );
     }
-    MessageQueue_Send( &stMsgQ1, pclMesg );
+    MessageQueue_Send( &stMsgQ1, pstMesg );
 
-    pclMesg = GlobalMessagePool_Pop();
+    pstMesg = GlobalMessagePool_Pop();
     if (bPass)
     {
-        Message_SetCode( pclMesg, 0xFF);
+        Message_SetCode( pstMesg, 0xFF);
     }
     else
     {
-        Message_SetCode( pclMesg, 0x11);
+        Message_SetCode( pstMesg, 0x11);
     }
-    MessageQueue_Send( &stMsgQ1, pclMesg );
+    MessageQueue_Send( &stMsgQ1, pstMesg );
 
     Thread_Exit( Scheduler_GetCurrentThread() );
 }
@@ -422,51 +422,51 @@ TEST(ut_sanity_msg)
     MessageQueue_Init( &stMsgQ1 );
     MessageQueue_Init( &stMsgQ2 );
 
-    Message_t *pclMsg;
+    Message_t *pstMsg;
 
-    pclMsg = GlobalMessagePool_Pop();
+    pstMsg = GlobalMessagePool_Pop();
 
     Thread_Init( &stTestThread1, aucTestStack1, TEST_STACK1_SIZE, 2, (ThreadEntry_t)TestMessageTest, NULL);
     Thread_Start( &stTestThread1 );
     Thread_Yield();
     
-    Message_SetCode( pclMsg, 0x11 );
-    Message_SetData( pclMsg, NULL );
+    Message_SetCode( pstMsg, 0x11 );
+    Message_SetData( pstMsg, NULL );
 
-    MessageQueue_Send( &stMsgQ2, pclMsg );
+    MessageQueue_Send( &stMsgQ2, pstMsg );
 
-    pclMsg = MessageQueue_Receive( &stMsgQ1 );
+    pstMsg = MessageQueue_Receive( &stMsgQ1 );
     
-    EXPECT_EQUALS(Message_GetCode( pclMsg ), 0x22);
+    EXPECT_EQUALS(Message_GetCode( pstMsg ), 0x22);
 
-    GlobalMessagePool_Push(pclMsg);
+    GlobalMessagePool_Push(pstMsg);
 
-    pclMsg = GlobalMessagePool_Pop();
-    Message_SetCode( pclMsg, 0xAA);
-    MessageQueue_Send( &stMsgQ2, pclMsg );
+    pstMsg = GlobalMessagePool_Pop();
+    Message_SetCode( pstMsg, 0xAA);
+    MessageQueue_Send( &stMsgQ2, pstMsg );
 
-    pclMsg = GlobalMessagePool_Pop();
-    Message_SetCode( pclMsg, 0xBB);
-    MessageQueue_Send( &stMsgQ2, pclMsg );
+    pstMsg = GlobalMessagePool_Pop();
+    Message_SetCode( pstMsg, 0xBB);
+    MessageQueue_Send( &stMsgQ2, pstMsg );
 
-    pclMsg = GlobalMessagePool_Pop();
-    Message_SetCode( pclMsg, 0xCC);
-    MessageQueue_Send( &stMsgQ2, pclMsg );
+    pstMsg = GlobalMessagePool_Pop();
+    Message_SetCode( pstMsg, 0xCC);
+    MessageQueue_Send( &stMsgQ2, pstMsg );
 
-    pclMsg = MessageQueue_Receive( &stMsgQ1 );
-    EXPECT_EQUALS(Message_GetCode( pclMsg ), 0xDD);
+    pstMsg = MessageQueue_Receive( &stMsgQ1 );
+    EXPECT_EQUALS(Message_GetCode( pstMsg ), 0xDD);
 
-    GlobalMessagePool_Push(pclMsg);
+    GlobalMessagePool_Push(pstMsg);
 
-    pclMsg = MessageQueue_Receive( &stMsgQ1 );
-    EXPECT_EQUALS(Message_GetCode( pclMsg ), 0xEE);
+    pstMsg = MessageQueue_Receive( &stMsgQ1 );
+    EXPECT_EQUALS(Message_GetCode( pstMsg ), 0xEE);
 
-    GlobalMessagePool_Push(pclMsg);
+    GlobalMessagePool_Push(pstMsg);
     
-    pclMsg = MessageQueue_Receive( &stMsgQ1 );
-    EXPECT_EQUALS(Message_GetCode( pclMsg ), 0xFF);
+    pstMsg = MessageQueue_Receive( &stMsgQ1 );
+    EXPECT_EQUALS(Message_GetCode( pstMsg ), 0xFF);
 
-    GlobalMessagePool_Push(pclMsg);
+    GlobalMessagePool_Push(pstMsg);
 }
 TEST_END
 
@@ -601,7 +601,7 @@ TEST(ut_sanity_quantum)
 }
 TEST_END
 
-void TimerTestCallback(Thread_t *pclOwner_, void *pvData_)
+void TimerTestCallback(Thread_t *pstOwner_, void *pvData_)
 {
     ucTestVal++;
 }

@@ -33,7 +33,7 @@ See license.txt for more information
 //---------------------------------------------------------------------------
 #if KERNEL_USE_DRIVER
 
-static DoubleLinkList_t m_clDriverList;
+static DoubleLinkList_t stDriverList;
 
 /*!
 	This object implements the "default" driver (/dev/null)
@@ -90,30 +90,30 @@ void DriverList_Init( void )
 {
     // Ensure we always have at least one entry - a default in case no match
     // is found (/dev/null)
-    DoubleLinkList_Init( (DoubleLinkList_t*)&m_clDriverList );
-    DoubleLinkList_Add( (DoubleLinkList_t*)&m_clDriverList, (LinkListNode_t*)&stDevNull);
+    DoubleLinkList_Init( (DoubleLinkList_t*)&stDriverList );
+    DoubleLinkList_Add( (DoubleLinkList_t*)&stDriverList, (LinkListNode_t*)&stDevNull);
 }
 
 //---------------------------------------------------------------------------
 void DriverList_Add( Driver_t *pstDriver_ )
 {
-    DoubleLinkList_Add( (DoubleLinkList_t*)&m_clDriverList, (LinkListNode_t*)pstDriver_ );
+    DoubleLinkList_Add( (DoubleLinkList_t*)&stDriverList, (LinkListNode_t*)pstDriver_ );
 }
 
 //---------------------------------------------------------------------------
-Driver_t *DriverList_FindByPath( const K_CHAR *m_pcPath )
+Driver_t *DriverList_FindByPath( const K_CHAR *pcPath )
 {
-	KERNEL_ASSERT( m_pcPath );
+	KERNEL_ASSERT( pcPath );
     Driver_t *pstTemp;
 
-    pstTemp = (Driver_t*)(LinkList_GetHead( (LinkList_t*)&m_clDriverList ) );
+    pstTemp = (Driver_t*)(LinkList_GetHead( (LinkList_t*)&stDriverList ) );
 	
     // Iterate through the list of drivers until we find a match, or we
     // exhaust our list of installed drivers
 	while (pstTemp)
 	{
 
-        if( DrvCmp( m_pcPath, Driver_GetPath( pstTemp ) ) )
+        if( DrvCmp( pcPath, Driver_GetPath( pstTemp ) ) )
 		{
 			return pstTemp;
 		}

@@ -26,15 +26,15 @@ See license.txt for more information
 //---------------------------------------------------------------------------
 void WriteBuffer16_SetBuffers( WriteBuffer16_t *pstBuffer_, K_USHORT *pusData_, K_USHORT usSize_ )
 {
-	pstBuffer_->m_pusData = pusData_;
-	pstBuffer_->m_usSize = usSize_;
-	pstBuffer_->m_usHead = 0;
-	pstBuffer_->m_usTail = 0;
+	pstBuffer_->pusData = pusData_;
+	pstBuffer_->usSize = usSize_;
+	pstBuffer_->usHead = 0;
+	pstBuffer_->usTail = 0;
 }
 //---------------------------------------------------------------------------
 void WriteBuffer16_SetCallback( WriteBuffer16_t *pstBuffer_, WriteBufferCallback pfCallback_ )
 { 
-	pstBuffer_->m_pfCallback = pfCallback_; 
+	pstBuffer_->pfCallback = pfCallback_; 
 }
 //---------------------------------------------------------------------------
 void WriteBuffer16_WriteData( WriteBuffer16_t *pstBuffer_, K_USHORT *pusBuf_, K_USHORT usLen_ )
@@ -64,29 +64,29 @@ void WriteBuffer16_WriteVector( WriteBuffer16_t *pstBuffer_, K_USHORT **ppusBuf_
 	
 	CS_ENTER();
 	
-    usTempHead = pstBuffer_->m_usHead;
+    usTempHead = pstBuffer_->usHead;
 	{		
 		for (i = 0; i < ucCount_; i++)
 		{
 			usTotalLen += pusLen_[i];
 		}
-        pstBuffer_->m_usHead = (usTempHead + usTotalLen) % pstBuffer_->m_usSize;
+        pstBuffer_->usHead = (usTempHead + usTotalLen) % pstBuffer_->usSize;
 	}	
 	CS_EXIT();
 	
 	// Call the callback if we cross the 50% mark or rollover 
-    if (pstBuffer_->m_usHead < usTempHead)
+    if (pstBuffer_->usHead < usTempHead)
 	{
-        if (pstBuffer_->m_pfCallback)
+        if (pstBuffer_->pfCallback)
 		{
 			bCallback = true;
 			bRollover = true;
 		}
 	}
-    else if ((usTempHead < (pstBuffer_->m_usSize >> 1)) && (pstBuffer_->m_usHead >= (pstBuffer_->m_usSize >> 1)))
+    else if ((usTempHead < (pstBuffer_->usSize >> 1)) && (pstBuffer_->usHead >= (pstBuffer_->usSize >> 1)))
 	{
 		// Only trigger the callback if it's non-null
-        if (pstBuffer_->m_pfCallback)
+        if (pstBuffer_->pfCallback)
 		{
 			bCallback = true;
 		}
@@ -96,13 +96,13 @@ void WriteBuffer16_WriteVector( WriteBuffer16_t *pstBuffer_, K_USHORT **ppusBuf_
 	for (j = 0; j < ucCount_; j++)
 	{
 		K_USHORT usSegmentLength = pusLen_[j];
-        if (usSegmentLength + usTempHead >= pstBuffer_->m_usSize)
+        if (usSegmentLength + usTempHead >= pstBuffer_->usSize)
 		{	
 			// We need to two-part this... First part: before the rollover
 			K_USHORT usTempLen;
-            K_USHORT *pusTmp = &pstBuffer_->m_pusData[ usTempHead ];
+            K_USHORT *pusTmp = &pstBuffer_->pusData[ usTempHead ];
 			K_USHORT *pusSrc = ppusBuf_[j];
-            usTempLen = pstBuffer_->m_usSize - usTempHead;
+            usTempLen = pstBuffer_->usSize - usTempHead;
 			for (i = 0; i < usTempLen; i++)
 			{
 				*pusTmp++ = *pusSrc++;
@@ -110,7 +110,7 @@ void WriteBuffer16_WriteVector( WriteBuffer16_t *pstBuffer_, K_USHORT **ppusBuf_
 
 			// Second part: after the rollover
 			usTempLen = usSegmentLength - usTempLen;
-            pusTmp = pstBuffer_->m_pusData;
+            pusTmp = pstBuffer_->pusData;
 			for (i = 0; i < usTempLen; i++)
 			{		
 				*pusTmp++ = *pusSrc++;
@@ -120,7 +120,7 @@ void WriteBuffer16_WriteVector( WriteBuffer16_t *pstBuffer_, K_USHORT **ppusBuf_
 		{	
 			// No rollover - do the copy all at once.
 			K_USHORT *pusSrc = ppusBuf_[j];
-            K_USHORT *pusTmp = &pstBuffer_->m_pusData[ usTempHead ];
+            K_USHORT *pusTmp = &pstBuffer_->pusData[ usTempHead ];
 			for (K_USHORT i = 0; i < usSegmentLength; i++)
 			{		
 				*pusTmp++ = *pusSrc++;
@@ -135,12 +135,12 @@ void WriteBuffer16_WriteVector( WriteBuffer16_t *pstBuffer_, K_USHORT **ppusBuf_
 		if (bRollover)
 		{
 			// Rollover - process the back-half of the buffer
-            pstBuffer_->m_pfCallback( &pstBuffer_->m_pusData[ pstBuffer_->m_usSize >> 1], pstBuffer_->m_usSize >> 1 );
+            pstBuffer_->pfCallback( &pstBuffer_->pusData[ pstBuffer_->usSize >> 1], pstBuffer_->usSize >> 1 );
 		} 
 		else 
 		{
 			// 50% point - process the front-half of the buffer
-            pstBuffer_->m_pfCallback( pstBuffer_->m_pusData, pstBuffer_->m_usSize >> 1);
+            pstBuffer_->pfCallback( pstBuffer_->pusData, pstBuffer_->usSize >> 1);
 		}
 	}
 }

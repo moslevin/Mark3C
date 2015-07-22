@@ -70,7 +70,7 @@ static K_USHORT EventFlag_Wait_i( EventFlag_t *pstFlag_, K_USHORT usMask_, Event
  */
 void EventFlag_Init( EventFlag_t *pstFlag_ ) 
 { 
-	pstFlag_->m_usSetMask = 0; 
+    pstFlag_->usSetMask = 0;
 	ThreadList_Init( (ThreadList_t*)pstFlag_ );
 }
 
@@ -119,7 +119,7 @@ void EventFlag_WakeMe( EventFlag_t *pstFlag_, Thread_t *pstChosenOne_)
     K_BOOL bMatch = false;
 
 #if KERNEL_USE_TIMEOUTS
-    Timer_t clEventTimer;
+    Timer_t stEventTimer;
     K_BOOL bUseTimer = false;
 #endif
 
@@ -135,7 +135,7 @@ void EventFlag_WakeMe( EventFlag_t *pstFlag_, Thread_t *pstChosenOne_)
     {
         // Check to see if the flags in their current state match all of
         // the set flags in the event flag group, with this mask.
-        if ((pstFlag_->m_usSetMask & usMask_) == usMask_)
+        if ((pstFlag_->usSetMask & usMask_) == usMask_)
         {
             bMatch = true;
 			Thread_SetEventFlagMask( g_pstCurrent, usMask_ );
@@ -145,10 +145,10 @@ void EventFlag_WakeMe( EventFlag_t *pstFlag_, Thread_t *pstChosenOne_)
     {
         // Check to see if the existing flags match any of the set flags in
         // the event flag group  with this mask
-        if (pstFlag_->m_usSetMask & usMask_)
+        if (pstFlag_->usSetMask & usMask_)
         {
             bMatch = true;
-            Thread_SetEventFlagMask( g_pstCurrent, pstFlag_->m_usSetMask & usMask_);
+            Thread_SetEventFlagMask( g_pstCurrent, pstFlag_->usSetMask & usMask_);
         }
     }
 
@@ -164,8 +164,8 @@ void EventFlag_WakeMe( EventFlag_t *pstFlag_, Thread_t *pstChosenOne_)
         {
 			Thread_SetExpired( g_pstCurrent, false );
             
-			Timer_Init( &clEventTimer );
-			Timer_Start( &clEventTimer, false, ulTimeMS_, TimedEventFlag_Callback, (void*)pstFlag_);
+            Timer_Init( &stEventTimer );
+            Timer_Start( &stEventTimer, false, ulTimeMS_, TimedEventFlag_Callback, (void*)pstFlag_);
             bUseTimer = true;
         }
 #endif
@@ -196,7 +196,7 @@ void EventFlag_WakeMe( EventFlag_t *pstFlag_, Thread_t *pstChosenOne_)
 #if KERNEL_USE_TIMEOUTS
     if (bUseTimer && bThreadYield)
     {
-		Timer_Stop( &clEventTimer );
+        Timer_Stop( &stEventTimer );
     }
 #endif
 
@@ -235,8 +235,8 @@ void EventFlag_Set( EventFlag_t *pstFlag_, K_USHORT usMask_)
     // the current flag set now matches any/all of the masks and modes of
     // the threads involved.
 
-    pstFlag_->m_usSetMask |= usMask_;
-    usNewMask = pstFlag_->m_usSetMask;
+    pstFlag_->usSetMask |= usMask_;
+    usNewMask = pstFlag_->usSetMask;
 
     // Start at the head of the list, and iterate through until we hit the
     // "head" element in the list again.  Ensure that we handle the case where
@@ -263,10 +263,10 @@ void EventFlag_Set( EventFlag_t *pstFlag_, K_USHORT usMask_)
             // in the thread's bitmask match the object's bitmask
             if ((EVENT_FLAG_ANY == eThreadMode) || (EVENT_FLAG_ANY_CLEAR == eThreadMode))
             {
-                if (usThreadMask & pstFlag_->m_usSetMask)
+                if (usThreadMask & pstFlag_->usSetMask)
                 {
                     Thread_SetEventFlagMode( pstPrev, EVENT_FLAG_PENDING_UNBLOCK );
-                    Thread_SetEventFlagMask( pstPrev, pstFlag_->m_usSetMask & usThreadMask );
+                    Thread_SetEventFlagMask( pstPrev, pstFlag_->usSetMask & usThreadMask );
                     bReschedule = true;
 
                     // If the "clear" variant is set, then clear the bits in the mask
@@ -281,7 +281,7 @@ void EventFlag_Set( EventFlag_t *pstFlag_, K_USHORT usMask_)
             // match the object's flag mask.
             else if ((EVENT_FLAG_ALL == eThreadMode) || (EVENT_FLAG_ALL_CLEAR == eThreadMode))
             {
-                if ((usThreadMask & pstFlag_->m_usSetMask) == usThreadMask)
+                if ((usThreadMask & pstFlag_->usSetMask) == usThreadMask)
                 {
                     Thread_SetEventFlagMode( pstPrev, EVENT_FLAG_PENDING_UNBLOCK );
                     Thread_SetEventFlagMask( pstPrev, usThreadMask);
@@ -333,7 +333,7 @@ void EventFlag_Set( EventFlag_t *pstFlag_, K_USHORT usMask_)
 
     // Update the bitmask based on any "clear" operations performed along
     // the way
-    pstFlag_->m_usSetMask = usNewMask;
+    pstFlag_->usSetMask = usNewMask;
 
     // Restore interrupts - will potentially cause a context switch if a
     // thread is unblocked.
@@ -345,7 +345,7 @@ void EventFlag_Clear( EventFlag_t *pstFlag_, K_USHORT usMask_)
 {
     // Just clear the bitfields in the local object.
     CS_ENTER();
-    pstFlag_->m_usSetMask &= ~usMask_;
+    pstFlag_->usSetMask &= ~usMask_;
     CS_EXIT();
 }
 
@@ -356,7 +356,7 @@ K_USHORT EventFlag_GetMask( EventFlag_t *pstFlag_ )
     // we get this within a critical section to guarantee atomicity.
     K_USHORT usReturn;
     CS_ENTER();
-    usReturn = pstFlag_->m_usSetMask;
+    usReturn = pstFlag_->usSetMask;
     CS_EXIT();
     return usReturn;
 }

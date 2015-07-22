@@ -41,7 +41,7 @@ static K_ULONG ulTimeVal;
 static K_ULONG ulTempTime;
 static volatile K_ULONG ulCallbackCount = 0;
 
-static void TimerCallback( Thread_t *pclOwner_, void *pvVal_ )
+static void TimerCallback( Thread_t *pstOwner_, void *pvVal_ )
 {
     Semaphore_Post( &stTimerSem );
     ulCallbackCount++;
@@ -211,13 +211,13 @@ TEST(ut_timer_repeat)
 
 #if 0
     // Debug code to print out the profiling times
-    Driver *pclDriver = DriverList_FindByPath("/dev/tty");
+    Driver *pstDriver = DriverList_FindByPath("/dev/tty");
     K_CHAR acData[13];
     MemUtil_DecimalToString(ulTimeVal, acData);
-    pclDriver->Write( MemUtil_StringLength(acData), (K_UCHAR*)acData);
-    pclDriver->Write(1, (K_UCHAR*)(" "));
+    pstDriver->Write( MemUtil_StringLength(acData), (K_UCHAR*)acData);
+    pstDriver->Write(1, (K_UCHAR*)(" "));
     MemUtil_DecimalToString(ulTempTime, acData);
-    pclDriver->Write( MemUtil_StringLength(acData), (K_UCHAR*)acData);
+    pstDriver->Write( MemUtil_StringLength(acData), (K_UCHAR*)acData);
 #endif
 
     Profiler_Stop();

@@ -39,7 +39,7 @@ allows threads to work cooperatively to achieve a goal in the system.
 // defines a thread object, stack (in word-array form), and the entry-point
 // function used by the application thread.
 #define APP1_STACK_SIZE      (320/sizeof(K_WORD))
-static Thread_t  clApp1Thread_t;
+static Thread_t  stApp1Thread_t;
 static K_WORD  awApp1Stack[APP1_STACK_SIZE];
 static void    App1Main(void *unused_);
 
@@ -48,14 +48,14 @@ static void    App1Main(void *unused_);
 // defines a thread object, stack (in word-array form), and the entry-point
 // function used by the application thread.
 #define APP2_STACK_SIZE      (320/sizeof(K_WORD))
-static Thread_t  clApp2Thread_t;
+static Thread_t  stApp2Thread_t;
 static K_WORD  awApp2Stack[APP2_STACK_SIZE];
 static void    App2Main(void *unused_);
 
 //---------------------------------------------------------------------------
 // This is the semaphore that we'll use to synchronize two threads in this
 // demo application
-static Semaphore_t   clMySem;
+static Semaphore_t   stMySem;
 
 //---------------------------------------------------------------------------
 int main(void)
@@ -74,15 +74,15 @@ int main(void)
     // work is done, the semaphore is posted to indicate that the other thread
     // can use the producer's work product.
 
-    Thread_Init( &clApp1Thread_t, awApp1Stack,  APP1_STACK_SIZE,  1, App1Main,  0);
-    Thread_Init( &clApp2Thread_t, awApp2Stack,  APP2_STACK_SIZE,  1, App2Main,  0);
+    Thread_Init( &stApp1Thread_t, awApp1Stack,  APP1_STACK_SIZE,  1, App1Main,  0);
+    Thread_Init( &stApp2Thread_t, awApp2Stack,  APP2_STACK_SIZE,  1, App2Main,  0);
 
-    Thread_Start( &clApp1Thread_t );
-    Thread_Start( &clApp2Thread_t );
+    Thread_Start( &stApp1Thread_t );
+    Thread_Start( &stApp2Thread_t );
 
     // Initialize a binary semaphore (maximum value of one, initial value of
     // zero).
-    Semaphore_Init( &clMySem, 0,1);
+    Semaphore_Init( &stMySem, 0,1);
 
     Kernel_Start();
 
@@ -96,7 +96,7 @@ void App1Main(void *unused_)
     {
         // Wait until the semaphore is posted from the other thread
         KernelAware_Print("Wait\n");
-        Semaphore_Pend( &clMySem );
+        Semaphore_Pend( &stMySem );
 		
         // Producer thread has finished doing its work -- do something to
         // consume its output.  Once again - a contrived example, but we
@@ -122,7 +122,7 @@ void App2Main(void *unused_)
         {
             ulCounter = 0;
             KernelAware_Print("Posted\n");
-			Semaphore_Post(&clMySem);
+            Semaphore_Post(&stMySem);
 
         }
     }

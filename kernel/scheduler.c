@@ -35,13 +35,13 @@ See license.txt for more information
 //---------------------------------------------------------------------------
 volatile Thread_t *g_pstNext;         //!< Pointer to the currently-chosen next-running thread
 Thread_t *g_pstCurrent;               //!< Pointer to the currently-running thread
-K_BOOL m_bEnabled;                    //! Scheduler's state - enabled or disabled
+K_BOOL bEnabled;                    //! Scheduler's state - enabled or disabled
 
 //---------------------------------------------------------------------------
-static ThreadList_t m_clStopList;     //! ThreadList_t for all stopped threads
-static ThreadList_t m_aclPriorities[NUM_PRIORITIES];    //! ThreadLists for all threads at all priorities
-static K_BOOL m_bQueuedSchedule;    //! Variable representing whether or not there's a queued scheduler operation
-static K_UCHAR m_ucPriFlag;         //! Bitmap flag for each
+static ThreadList_t stStopList;     //! ThreadList_t for all stopped threads
+static ThreadList_t aclPriorities[NUM_PRIORITIES];    //! ThreadLists for all threads at all priorities
+static K_BOOL bQueuedSchedule;    //! Variable representing whether or not there's a queued scheduler operation
+static K_UCHAR ucPriFlag;         //! Bitmap flag for each
 
 //---------------------------------------------------------------------------
 /*!
@@ -57,15 +57,15 @@ static const K_UCHAR aucCLZ[16] ={255,0,1,1,2,2,2,2,3,3,3,3,3,3,3,3};
 //---------------------------------------------------------------------------
 void Scheduler_Init()
 {
-    m_ucPriFlag = 0;
+    ucPriFlag = 0;
     uint8_t i;
     for (i = 0; i < NUM_PRIORITIES; i++)
     {
-        ThreadList_Init( &m_aclPriorities[i] );
-        ThreadList_SetPriority( &m_aclPriorities[i], i );
-        ThreadList_SetFlagPointer( &m_aclPriorities[i], &m_ucPriFlag );
+        ThreadList_Init( &aclPriorities[i] );
+        ThreadList_SetPriority( &aclPriorities[i], i );
+        ThreadList_SetFlagPointer( &aclPriorities[i], &ucPriFlag );
     }
-    m_bQueuedSchedule = false;
+    bQueuedSchedule = false;
 }
 
 //---------------------------------------------------------------------------
@@ -74,15 +74,15 @@ void Scheduler_Schedule()
     K_UCHAR ucPri = 0;
     
     // Figure out what priority level has ready tasks (8 priorities max)
-    // To do this, we apply our current active-thread bitmap (m_ucPriFlag)
+    // To do this, we apply our current active-thread bitmap (ucPriFlag)
     // and perform a CLZ on the upper four bits.  If no tasks are found
     // in the higher priority bits, search the lower priority bits.  This
     // also assumes that we always have the idle thread ready-to-run in
     // priority level zero.
-    ucPri = aucCLZ[m_ucPriFlag >> 4 ];
+    ucPri = aucCLZ[ucPriFlag >> 4 ];
     if (ucPri == 0xFF)
     {
-        ucPri = aucCLZ[m_ucPriFlag & 0x0F];
+        ucPri = aucCLZ[ucPriFlag & 0x0F];
     }
     else
     {
@@ -99,7 +99,7 @@ void Scheduler_Schedule()
 #endif
     {
         // Get the thread node at this priority.
-        g_pstNext = (Thread_t*)( LinkList_GetHead( (LinkList_t*)&m_aclPriorities[ucPri] ) );
+        g_pstNext = (Thread_t*)( LinkList_GetHead( (LinkList_t*)&aclPriorities[ucPri] ) );
     }
     KERNEL_TRACE_1( STR_SCHEDULE_1, (K_USHORT)Thread_GetID( (Thread_t*)g_pstNext) );
 }
@@ -107,14 +107,14 @@ void Scheduler_Schedule()
 //---------------------------------------------------------------------------
 void Scheduler_Add(Thread_t *pstThread_)
 {
-    ThreadList_Add( &m_aclPriorities[ Thread_GetPriority(pstThread_) ],
+    ThreadList_Add( &aclPriorities[ Thread_GetPriority(pstThread_) ],
                     pstThread_ );
 }
 
 //---------------------------------------------------------------------------
 void Scheduler_Remove(Thread_t *pstThread_)
 {
-    ThreadList_Remove( &m_aclPriorities[ Thread_GetPriority(pstThread_) ],
+    ThreadList_Remove( &aclPriorities[ Thread_GetPriority(pstThread_) ],
                        pstThread_ );
 }
 
@@ -123,13 +123,13 @@ K_BOOL Scheduler_SetScheduler(K_BOOL bEnable_)
 {
     K_BOOL bRet ;
     CS_ENTER();
-    bRet = m_bEnabled;
-    m_bEnabled = bEnable_;
+    bRet = bEnabled;
+    bEnabled = bEnable_;
     // If there was a queued scheduler evevent, dequeue and trigger an
     // immediate Yield
-    if (m_bEnabled && m_bQueuedSchedule)
+    if (bEnabled && bQueuedSchedule)
     {
-        m_bQueuedSchedule = false;
+        bQueuedSchedule = false;
         Thread_Yield();
     }
     CS_EXIT();
@@ -145,13 +145,13 @@ K_BOOL Scheduler_SetScheduler(K_BOOL bEnable_)
  */
 void Scheduler_QueueScheduler()
 {
-    m_bQueuedSchedule = true;
+    bQueuedSchedule = true;
 }
 
 //---------------------------------------------------------------------------
 ThreadList_t *Scheduler_GetThreadList( K_UCHAR ucPriority_ )
 {
-    return &m_aclPriorities[ucPriority_];
+    return &aclPriorities[ucPriority_];
 }
 
 //---------------------------------------------------------------------------
@@ -165,6 +165,6 @@ ThreadList_t *Scheduler_GetThreadList( K_UCHAR ucPriority_ )
 */
 ThreadList_t *Scheduler_GetStopList()
 {
-    return &m_clStopList;
+    return &stStopList;
 }
 

@@ -42,35 +42,35 @@ See license.txt for more information
 void Timer_Init( Timer_t *pstTimer_ )
 {
     LinkListNode_Clear( (LinkListNode_t*)pstTimer_ );
-    pstTimer_->m_ulInterval = 0;
-    pstTimer_->m_ulTimerTolerance = 0;
-    pstTimer_->m_ulTimeLeft = 0;
-    pstTimer_->m_ucFlags = 0;
+    pstTimer_->ulInterval = 0;
+    pstTimer_->ulTimerTolerance = 0;
+    pstTimer_->ulTimeLeft = 0;
+    pstTimer_->ucFlags = 0;
 }
 
 //---------------------------------------------------------------------------
 void Timer_Start( Timer_t *pstTimer_, K_BOOL bRepeat_, K_ULONG ulIntervalMs_, TimerCallback_t pfCallback_, void *pvData_ )
 {
     Timer_SetIntervalMSeconds( pstTimer_, ulIntervalMs_ );
-    pstTimer_->m_ulTimerTolerance = 0;
-    pstTimer_->m_pfCallback = pfCallback_;
-    pstTimer_->m_pvData = pvData_;
+    pstTimer_->ulTimerTolerance = 0;
+    pstTimer_->pfCallback = pfCallback_;
+    pstTimer_->pvData = pvData_;
     if (!bRepeat_)
     {
-        pstTimer_->m_ucFlags = TIMERLIST_FLAG_ONE_SHOT;
+        pstTimer_->ucFlags = TIMERLIST_FLAG_ONE_SHOT;
     }
     else
     {
-        pstTimer_->m_ucFlags = 0;
+        pstTimer_->ucFlags = 0;
     }
-    pstTimer_->m_pstOwner = Scheduler_GetCurrentThread();
+    pstTimer_->pstOwner = Scheduler_GetCurrentThread();
     TimerScheduler_Add( pstTimer_ );
 }
 
 //---------------------------------------------------------------------------
 void Timer_StartEx( Timer_t *pstTimer_, K_BOOL bRepeat_, K_ULONG ulIntervalMs_, K_ULONG ulToleranceMs_, TimerCallback_t pfCallback_, void *pvData_ )
 {
-    pstTimer_->m_ulTimerTolerance = MSECONDS_TO_TICKS( ulToleranceMs_ );
+    pstTimer_->ulTimerTolerance = MSECONDS_TO_TICKS( ulToleranceMs_ );
     Timer_Start( pstTimer_, bRepeat_, ulIntervalMs_, pfCallback_, pvData_ );
 }
 
@@ -83,31 +83,31 @@ void Timer_Stop( Timer_t *pstTimer_ )
 //---------------------------------------------------------------------------
 void Timer_SetFlags ( Timer_t *pstTimer_, K_UCHAR ucFlags_)
 {
-    pstTimer_->m_ucFlags = ucFlags_;
+    pstTimer_->ucFlags = ucFlags_;
 }
 
 //---------------------------------------------------------------------------
 void Timer_SetCallback( Timer_t *pstTimer_, TimerCallback_t pfCallback_)
 {
-    pstTimer_->m_pfCallback = pfCallback_;
+    pstTimer_->pfCallback = pfCallback_;
 }
 
 //---------------------------------------------------------------------------
 void Timer_SetData( Timer_t *pstTimer_, void *pvData_ )
 {
-    pstTimer_->m_pvData = pvData_;
+    pstTimer_->pvData = pvData_;
 }
 
 //---------------------------------------------------------------------------
 void Timer_SetOwner( Timer_t *pstTimer_, Thread_t *pstOwner_)
 {
-    pstTimer_->m_pstOwner = pstOwner_;
+    pstTimer_->pstOwner = pstOwner_;
 }
 
 //---------------------------------------------------------------------------
 void Timer_SetIntervalTicks( Timer_t *pstTimer_, K_ULONG ulTicks_ )
 {
-    pstTimer_->m_ulInterval = ulTicks_;
+    pstTimer_->ulInterval = ulTicks_;
 }
 
 //---------------------------------------------------------------------------
@@ -115,30 +115,30 @@ void Timer_SetIntervalTicks( Timer_t *pstTimer_, K_ULONG ulTicks_ )
 //---------------------------------------------------------------------------
 void Timer_SetIntervalSeconds( Timer_t *pstTimer_, K_ULONG ulSeconds_)
 {
-    pstTimer_->m_ulInterval = SECONDS_TO_TICKS(ulSeconds_);
+    pstTimer_->ulInterval = SECONDS_TO_TICKS(ulSeconds_);
 }
 
 //---------------------------------------------------------------------------
 void Timer_SetIntervalMSeconds( Timer_t *pstTimer_, K_ULONG ulMSeconds_)
 {
-    pstTimer_->m_ulInterval = MSECONDS_TO_TICKS(ulMSeconds_);
+    pstTimer_->ulInterval = MSECONDS_TO_TICKS(ulMSeconds_);
 }
 
 //---------------------------------------------------------------------------
 void Timer_SetIntervalUSeconds( Timer_t *pstTimer_, K_ULONG ulUSeconds_)
 {
-    pstTimer_->m_ulInterval = USECONDS_TO_TICKS(ulUSeconds_);
+    pstTimer_->ulInterval = USECONDS_TO_TICKS(ulUSeconds_);
 }
 
 //---------------------------------------------------------------------------
 void Timer_SetTolerance( Timer_t *pstTimer_, K_ULONG ulTicks_)
 {
-    pstTimer_->m_ulTimerTolerance = ulTicks_;
+    pstTimer_->ulTimerTolerance = ulTicks_;
 }
 //---------------------------------------------------------------------------
 K_ULONG Timer_GetInterval( Timer_t *pstTimer_ )
 {
-    return pstTimer_->m_ulInterval;
+    return pstTimer_->ulInterval;
 }
 
 

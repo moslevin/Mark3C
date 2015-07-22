@@ -25,7 +25,7 @@ Lessons covered in this example include:
 Takeaway:
 
 Like Semaphores and Mutexes, EventFlag objects can be used to synchronize
-the execution of threads in a system.  The EventFlag class allows for many
+the execution of threads in a system.  The EventFlag object allows for many
 threads to share the same object, blocking on different event combinations.
 This provides an efficient, robust way for threads to process asynchronous
 system events that occur with a unified interface.
@@ -37,7 +37,7 @@ system events that occur with a unified interface.
 // defines a thread object, stack (in word-array form), and the entry-point
 // function used by the application thread.
 #define APP1_STACK_SIZE      (320/sizeof(K_WORD))
-static Thread_t  clApp1Thread;
+static Thread_t  stApp1Thread;
 static K_WORD  awApp1Stack[APP1_STACK_SIZE];
 static void    App1Main(void *unused_);
 
@@ -46,13 +46,13 @@ static void    App1Main(void *unused_);
 // defines a thread object, stack (in word-array form), and the entry-point
 // function used by the application thread.
 #define APP2_STACK_SIZE      (320/sizeof(K_WORD))
-static Thread_t  clApp2Thread;
+static Thread_t  stApp2Thread;
 static K_WORD  awApp2Stack[APP2_STACK_SIZE];
 static void    App2Main(void *unused_);
 
 //---------------------------------------------------------------------------
 //
-static EventFlag_t clFlags;
+static EventFlag_t stFlags;
 
 //---------------------------------------------------------------------------
 int main(void)
@@ -60,13 +60,13 @@ int main(void)
     // See the annotations in previous labs for details on init.
     Kernel_Init();
 
-	Thread_Init( &clApp1Thread, awApp1Stack,  APP1_STACK_SIZE,  1, App1Main,  0);
-    Thread_Init( &clApp2Thread, awApp2Stack,  APP2_STACK_SIZE,  1, App2Main,  0);
+    Thread_Init( &stApp1Thread, awApp1Stack,  APP1_STACK_SIZE,  1, App1Main,  0);
+    Thread_Init( &stApp2Thread, awApp2Stack,  APP2_STACK_SIZE,  1, App2Main,  0);
 
-	Thread_Start( &clApp1Thread );
-	Thread_Start( &clApp2Thread );
+    Thread_Start( &stApp1Thread );
+    Thread_Start( &stApp2Thread );
 	
-	EventFlag_Init( &clFlags );
+    EventFlag_Init( &stFlags );
     
     Kernel_Start();
 
@@ -93,7 +93,7 @@ void App1Main(void *unused_)
         // you wanted to trigger an action that only takes place once multiple
         // bits are set, you could block the thread waiting for a specific
         // event bitmask with EVENT_FLAG_ALL specified.
-        usFlags = EventFlag_Wait( &clFlags, 0xFFFF, EVENT_FLAG_ANY);
+        usFlags = EventFlag_Wait( &stFlags, 0xFFFF, EVENT_FLAG_ANY);
 
         // Print a message indicaating which bit was set this time.
         switch (usFlags)
@@ -152,7 +152,7 @@ void App1Main(void *unused_)
 
         // Clear the event-flag that we just printed a message about.  This
         // will allow us to acknowledge further events in that bit in the future.
-        EventFlag_Clear( &clFlags, usFlags );
+        EventFlag_Clear( &stFlags, usFlags );
 
     }
 }
@@ -169,7 +169,7 @@ void App2Main(void *unused_)
         // set one bit each 100ms.  In this loop, we cycle through bits 0-15
         // repeatedly.  Note that this will wake the other thread, which is
         // blocked, waiting for *any* of the flags in the bitmap to be set.
-        EventFlag_Set( &clFlags, usFlag);
+        EventFlag_Set( &stFlags, usFlag);
 
         // Bitshift the flag value to the left.  This will be the flag we set
         // the next time this thread runs through its loop.

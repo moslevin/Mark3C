@@ -13,7 +13,7 @@ See license.txt for more information
 ===========================================================================*/
 /*!
     \file unit_test.cpp
-    \brief Unit test class definition
+    \brief Unit test object definition
 */
 
 #include "kerneltypes.h"
@@ -22,42 +22,42 @@ See license.txt for more information
 //---------------------------------------------------------------------------
 void UnitTest_Init( UnitTest_t *pstTest_ )
 {
-    pstTest_->m_bIsActive = false;
-    pstTest_->m_usIterations = 0;
-    pstTest_->m_usPassed = 0;
-    pstTest_->m_bComplete = false;
+    pstTest_->bIsActive = false;
+    pstTest_->usIterations = 0;
+    pstTest_->usPassed = 0;
+    pstTest_->bComplete = false;
 }
 
 //---------------------------------------------------------------------------
 void UnitTest_Pass( UnitTest_t *pstTest_ )
 { 
-    if (pstTest_->m_bComplete)
+    if (pstTest_->bComplete)
     {
         return;
     }
     
-    if (pstTest_->m_bIsActive)
+    if (pstTest_->bIsActive)
     { 
-        pstTest_->m_bIsActive = false;
-        pstTest_->m_usIterations++;
-        pstTest_->m_usPassed++;
-        pstTest_->m_bStatus = true;
+        pstTest_->bIsActive = false;
+        pstTest_->usIterations++;
+        pstTest_->usPassed++;
+        pstTest_->bStatus = true;
     }        
 }    
 
 //---------------------------------------------------------------------------
 void UnitTest_Fail( UnitTest_t *pstTest_ )
 {
-    if (pstTest_->m_bComplete)
+    if (pstTest_->bComplete)
     {
         return;
     }
     
-    if (pstTest_->m_bIsActive)
+    if (pstTest_->bIsActive)
     {
-        pstTest_->m_bIsActive = false;
-        pstTest_->m_usIterations++;
-        pstTest_->m_bStatus = false;
+        pstTest_->bIsActive = false;
+        pstTest_->usIterations++;
+        pstTest_->bStatus = false;
     }
 }
 
@@ -118,47 +118,47 @@ void UnitTest_ExpectFailLessThanEquals( UnitTest_t *pstTest_, K_LONG lVal_, K_LO
 //---------------------------------------------------------------------------
 void UnitTest_SetName( UnitTest_t *pstTest_, const K_CHAR *szName_ )
 {
-    pstTest_->m_szName = szName_;
+    pstTest_->szName = szName_;
 }
 
 //---------------------------------------------------------------------------
 void UnitTest_Start( UnitTest_t *pstTest_ )
 {
-    pstTest_->m_bIsActive = 1;
+    pstTest_->bIsActive = 1;
 }
 
 //---------------------------------------------------------------------------
 void UnitTest_Complete( UnitTest_t *pstTest_ )
 {
-    pstTest_->m_bComplete = 1;
+    pstTest_->bComplete = 1;
 }
 
 //---------------------------------------------------------------------------
 const K_CHAR *UnitTest_GetName( UnitTest_t *pstTest_ )
 {
-    return pstTest_->m_szName;
+    return pstTest_->szName;
 }
 
 //---------------------------------------------------------------------------
 bool UnitTest_GetResult(UnitTest_t *pstTest_)
 {
-    return pstTest_->m_bStatus;
+    return pstTest_->bStatus;
 }
 
 //---------------------------------------------------------------------------
 K_USHORT UnitTest_GetPassed(UnitTest_t *pstTest_)
 {
-    return pstTest_->m_usPassed;
+    return pstTest_->usPassed;
 }
 
 //---------------------------------------------------------------------------
 K_USHORT UnitTest_GetFailed(UnitTest_t *pstTest_)
 {
-    return pstTest_->m_usIterations - pstTest_->m_usPassed;
+    return pstTest_->usIterations - pstTest_->usPassed;
 }
 
 //---------------------------------------------------------------------------
 K_USHORT UnitTest_GetTotal(UnitTest_t *pstTest_)
 {
-    return pstTest_->m_usIterations;
+    return pstTest_->usIterations;
 }

@@ -41,16 +41,16 @@ void ThreadPort_InitStack(Thread_t *pstThread_)
     K_USHORT i;
 
     // Get the address of the thread's entry function
-    usAddr = (K_USHORT)(pstThread_->m_pfEntryPoint);
+    usAddr = (K_USHORT)(pstThread_->pfEntryPoint);
 
     // Start by finding the bottom of the stack
-    pucStack = (K_UCHAR*)pstThread_->m_pwStackTop;
+    pucStack = (K_UCHAR*)pstThread_->pwStackTop;
 
     // clear the stack, and initialize it to a known-default value (easier
     // to debug when things go sour with stack corruption or overflow)
-    for (i = 0; i < pstThread_->m_usStackSize; i++)
+    for (i = 0; i < pstThread_->usStackSize; i++)
     {
-        pstThread_->m_pwStack[i] = 0xFF;
+        pstThread_->pwStack[i] = 0xFF;
     }
 
     // Our context starts with the entry function
@@ -71,8 +71,8 @@ void ThreadPort_InitStack(Thread_t *pstThread_)
     }
 
     // Assume that the argument is the only stack variable
-    PUSH_TO_STACK(pucStack, (K_UCHAR)(((K_USHORT)(pstThread_->m_pvArg)) & 0x00FF));    //R24
-    PUSH_TO_STACK(pucStack, (K_UCHAR)((((K_USHORT)(pstThread_->m_pvArg))>>8) & 0x00FF)); //R25
+    PUSH_TO_STACK(pucStack, (K_UCHAR)(((K_USHORT)(pstThread_->pvArg)) & 0x00FF));    //R24
+    PUSH_TO_STACK(pucStack, (K_UCHAR)((((K_USHORT)(pstThread_->pvArg))>>8) & 0x00FF)); //R25
 
     // Push the rest of the registers in the context
     for (i = 26; i <=31; i++)
@@ -81,7 +81,7 @@ void ThreadPort_InitStack(Thread_t *pstThread_)
     }
     
     // Set the top o' the stack.
-    pstThread_->m_pwStackTop = (K_UCHAR*)pucStack;
+    pstThread_->pwStackTop = (K_UCHAR*)pucStack;
 
     // That's it!  the thread is ready to run now.
 }
@@ -174,6 +174,6 @@ ISR(TIMER1_COMPA_vect)
     TimerScheduler_Process();
 #endif    
 #if KERNEL_USE_QUANTUM    
-    Quantum_UpdateTimer();
+    QuantuUpdateTimer();
 #endif
 }

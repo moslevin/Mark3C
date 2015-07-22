@@ -59,12 +59,12 @@ static Semaphore_t stSem2;
 static volatile K_UCHAR ucCounter = 0;
 
 //===========================================================================
-void PostPendFunction(void *param_)
+void PostPendFunction(void *para)
 {
-    Semaphore_t *pclSem = (Semaphore_t*)param_;
+    Semaphore_t *pstSem = (Semaphore_t*)para;
     while(1)
     {
-        Semaphore_Pend( pclSem );
+        Semaphore_Pend( pstSem );
         ucCounter++;
     }
 }
@@ -114,13 +114,13 @@ TEST(ut_semaphore_post_pend)
 TEST_END
 
 //===========================================================================
-void TimeSemFunction(void *param_)
+void TimeSemFunction(void *para)
 {
-    Semaphore_t *pclSem = (Semaphore_t*)param_;
+    Semaphore_t *pstSem = (Semaphore_t*)para;
 
     Thread_Sleep(20);
 
-    Semaphore_Post( pclSem );
+    Semaphore_Post( pstSem );
 
     Thread_Exit( Scheduler_GetCurrentThread() );
 }

@@ -102,8 +102,8 @@ do { \
 //---------------------------------------------------------------------------
 #define LinkList_Init( pstList_ ) \
 { \
-    ((LinkList_t*)(pstList_))->m_pstHead = NULL; \
-    ((LinkList_t*)(pstList_))->m_pstTail = NULL; \
+    ((LinkList_t*)(pstList_))->pstHead = NULL; \
+    ((LinkList_t*)(pstList_))->pstTail = NULL; \
 }
 #define DoubleLinkList_Init( pstList_ )     (LinkList_Init( ((LinkList_t*)(pstList_) ) ))
 #define CircularLinkList_Init( pstList_ )   (LinkList_Init( ((LinkList_t*)(pstList_) ) ))
@@ -116,7 +116,7 @@ do { \
 
     \return Pointer to the head node in the list
 */
-#define LinkList_GetHead( pstList_ )   ( ((LinkList_t*)(pstList_))->m_pstHead )
+#define LinkList_GetHead( pstList_ )   ( ((LinkList_t*)(pstList_))->pstHead )
 
 //---------------------------------------------------------------------------
 /*!
@@ -126,7 +126,7 @@ do { \
 
     \return Pointer to the tail node in the list
 */
-#define LinkList_GetTail( pstList_ )    ( ((LinkList_t*)(pstList_))->m_pstTail )
+#define LinkList_GetTail( pstList_ )    ( ((LinkList_t*)(pstList_))->pstTail )
 
 //---------------------------------------------------------------------------
 /*!
@@ -134,8 +134,8 @@ do { \
 */
 typedef struct _LinkList
 {
-    LinkListNode_t *m_pstHead;    //!< Pointer to the head node in the list
-    LinkListNode_t *m_pstTail;    //!< Pointer to the tail node in the list
+    LinkListNode_t *pstHead;    //!< Pointer to the head node in the list
+    LinkListNode_t *pstTail;    //!< Pointer to the tail node in the list
 } LinkList_t;
 
 //---------------------------------------------------------------------------
@@ -144,8 +144,8 @@ typedef struct _LinkList
 */
 typedef struct _DoubleLinkList
 {
-    LinkListNode_t *m_pstHead;    //!< Pointer to the head node in the list
-    LinkListNode_t *m_pstTail;    //!< Pointer to the tail node in the list
+    LinkListNode_t *pstHead;    //!< Pointer to the head node in the list
+    LinkListNode_t *pstTail;    //!< Pointer to the tail node in the list
 } DoubleLinkList_t;
 
 
@@ -175,8 +175,8 @@ void DoubleLinkList_Remove( DoubleLinkList_t *pstList_, LinkListNode_t *node_ );
 */
 typedef struct _CircularLinkList
 {
-    LinkListNode_t *m_pstHead;    //!< Pointer to the head node in the list
-    LinkListNode_t *m_pstTail;    //!< Pointer to the tail node in the list
+    LinkListNode_t *pstHead;    //!< Pointer to the head node in the list
+    LinkListNode_t *pstTail;    //!< Pointer to the tail node in the list
 } CircularLinkList_t;
 
 //---------------------------------------------------------------------------

@@ -34,13 +34,13 @@ See license.txt for more information
 #include "kerneldebug.h"
 #include "kernelaware.h"
 
-K_BOOL m_bIsStarted;
-K_BOOL m_bIsPanic;
-panic_func_t m_pfPanic;
+K_BOOL bIsStarted;
+K_BOOL bIsPanic;
+panic_func_t pfPanic;
 
 #if KERNEL_USE_IDLE_FUNC
-idle_func_t m_pfIdle;
-FakeThread_t m_clIdle;
+idle_func_t pfIdle;
+FakeThread_t stIdle;
 #endif
 
 //---------------------------------------------------------------------------
@@ -52,9 +52,9 @@ FakeThread_t m_clIdle;
 //---------------------------------------------------------------------------
 void Kernel_Init(void)
 {
-    m_bIsStarted = false;
-    m_bIsPanic = false;
-    m_pfPanic = 0;
+    bIsStarted = false;
+    bIsPanic = false;
+    pfPanic = 0;
 
 #if KERNEL_AWARE_SIMULATION
     g_ucKACommand = KA_COMMAND_IDLE;
@@ -66,8 +66,8 @@ void Kernel_Init(void)
 #endif
 
 #if KERNEL_USE_IDLE_FUNC
-	Thread_InitIdle( (Thread_t*)&m_clIdle );
-	m_pfIdle = 0;
+	Thread_InitIdle( (Thread_t*)&stIdle );
+	pfIdle = 0;
 #endif
 	
 	KERNEL_TRACE( STR_MARK3_INIT );
@@ -93,7 +93,7 @@ void Kernel_Init(void)
 void Kernel_Start(void)
 {
 	KERNEL_TRACE( STR_THREAD_START );    
-    m_bIsStarted = true;
+    bIsStarted = true;
     ThreadPort_StartThreads();
 	KERNEL_TRACE( STR_START_ERROR );
 }
@@ -101,10 +101,10 @@ void Kernel_Start(void)
 //---------------------------------------------------------------------------
 void Kernel_Panic(K_USHORT usCause_)
 {
-    m_bIsPanic = true;
-    if (m_pfPanic)
+    bIsPanic = true;
+    if (pfPanic)
     {
-        m_pfPanic(usCause_);
+        pfPanic(usCause_);
     }
     else
     {
@@ -118,39 +118,39 @@ void Kernel_Panic(K_USHORT usCause_)
 //---------------------------------------------------------------------------
 K_BOOL Kernel_IsStarted( void )    
 {   
-	return m_bIsStarted;    
+	return bIsStarted;    
 }
 
 //---------------------------------------------------------------------------
 void Kernel_SetPanic( panic_func_t pfPanic_ ) 
 { 
-	m_pfPanic = pfPanic_; 
+	pfPanic = pfPanic_; 
 }
 	
 //---------------------------------------------------------------------------
 K_BOOL Kernel_IsPanic( void )      
 {   
-	return m_bIsPanic;   
+	return bIsPanic;   
 }
 	
 //---------------------------------------------------------------------------
 void Kernel_SetIdleFunc( idle_func_t pfIdle_ )  
 {   
-	m_pfIdle = pfIdle_; 
+	pfIdle = pfIdle_; 
 }
 	
 //---------------------------------------------------------------------------
 void Kernel_IdleFunc( void ) 
 { 
-	if (m_pfIdle != 0 ) 
+	if (pfIdle != 0 ) 
 	{ 
-		m_pfIdle(); 
+		pfIdle(); 
 	} 
 }
 
 //---------------------------------------------------------------------------
 Thread_t *Kernel_GetIdleThread( void ) 
 { 
-	return (Thread_t*)&m_clIdle; 
+	return (Thread_t*)&stIdle; 
 }
 

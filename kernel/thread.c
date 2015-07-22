@@ -54,34 +54,34 @@ void Thread_Init(   Thread_t *pstThread_,
     
     LinkListNode_Clear( (LinkListNode_t*)pstThread_ );
 
-    pstThread_->m_ucThreadID = ucThreadID++;
+    pstThread_->ucThreadID = ucThreadID++;
     
     KERNEL_TRACE_1( STR_STACK_SIZE_1, usStackSize_ );
     KERNEL_TRACE_1( STR_PRIORITY_1, (K_UCHAR)ucPriority_ );
-    KERNEL_TRACE_1( STR_THREAD_ID_1, (K_USHORT)pstThread_->m_ucThreadID );
+    KERNEL_TRACE_1( STR_THREAD_ID_1, (K_USHORT)pstThread_->ucThreadID );
     KERNEL_TRACE_1( STR_ENTRYPOINT_1, (K_USHORT)pfEntryPoint_ );
     
     // Initialize the thread parameters to their initial values.
-    pstThread_->m_pwStack = pwStack_;
-    pstThread_->m_pwStackTop = TOP_OF_STACK(pwStack_, usStackSize_);
+    pstThread_->pwStack = pwStack_;
+    pstThread_->pwStackTop = TOP_OF_STACK(pwStack_, usStackSize_);
     
-    pstThread_->m_usStackSize = usStackSize_;
+    pstThread_->usStackSize = usStackSize_;
     
 #if KERNEL_USE_QUANTUM    
-    pstThread_->m_usQuantum = THREAD_QUANTUM_DEFAULT;
+    pstThread_->usQuantum = THREAD_QUANTUM_DEFAULT;
 #endif
 
-    pstThread_->m_ucPriority = ucPriority_ ;
-    pstThread_->m_ucCurPriority = pstThread_->m_ucPriority;
-    pstThread_->m_pfEntryPoint = pfEntryPoint_;
-    pstThread_->m_pvArg = pvArg_;
-    pstThread_->m_eState = THREAD_STATE_STOP;
+    pstThread_->ucPriority = ucPriority_ ;
+    pstThread_->ucCurPriority = pstThread_->ucPriority;
+    pstThread_->pfEntryPoint = pfEntryPoint_;
+    pstThread_->pvArg = pvArg_;
+    pstThread_->eState = THREAD_STATE_STOP;
     
 #if KERNEL_USE_THREADNAME    
-    pstThread_->m_szName = NULL;
+    pstThread_->szName = NULL;
 #endif
 #if KERNEL_USE_TIMERS
-	Timer_Init( &(pstThread_->m_clTimer) );
+    Timer_Init( &(pstThread_->stTimer) );
 #endif
 
     // Call CPU-specific stack initialization
@@ -89,9 +89,9 @@ void Thread_Init(   Thread_t *pstThread_,
     
     // Add to the global "stop" list.
     CS_ENTER();
-    pstThread_->m_pstOwner = Scheduler_GetThreadList(pstThread_->m_ucPriority);
-    pstThread_->m_pstCurrent = Scheduler_GetStopList();
-    ThreadList_Add( pstThread_->m_pstCurrent, pstThread_ );
+    pstThread_->pstOwner = Scheduler_GetThreadList(pstThread_->ucPriority);
+    pstThread_->pstCurrent = Scheduler_GetStopList();
+    ThreadList_Add( pstThread_->pstCurrent, pstThread_ );
 	CS_EXIT();
 }
 
@@ -100,22 +100,22 @@ void Thread_Start( Thread_t *pstThread_ )
 {
     // Remove the thread from the scheduler's "stopped" list, and add it 
     // to the scheduler's ready list at the proper priority.
-    KERNEL_TRACE_1( STR_THREAD_START_1, (K_USHORT)pstThread_->m_ucThreadID );
+    KERNEL_TRACE_1( STR_THREAD_START_1, (K_USHORT)pstThread_->ucThreadID );
     
     CS_ENTER();
     ThreadList_Remove( Scheduler_GetStopList(), pstThread_ );
     Scheduler_Add(pstThread_);
-    pstThread_->m_pstOwner = Scheduler_GetThreadList(pstThread_->m_ucPriority);
-    pstThread_->m_pstCurrent = pstThread_->m_pstOwner;
-    pstThread_->m_eState = THREAD_STATE_READY;
+    pstThread_->pstOwner = Scheduler_GetThreadList(pstThread_->ucPriority);
+    pstThread_->pstCurrent = pstThread_->pstOwner;
+    pstThread_->eState = THREAD_STATE_READY;
 
 #if KERNEL_USE_QUANTUM
     if ( Thread_GetCurPriority( pstThread_ ) >= 
 		 Thread_GetCurPriority( Scheduler_GetCurrentThread() ) )
     {
         // Deal with the thread Quantum
-        Quantum_RemoveThread();
-        Quantum_AddThread(pstThread_);
+        QuantuRemoveThread();
+        QuantuAddThread(pstThread_);
     }
 #endif
 
@@ -145,26 +145,26 @@ void Thread_Stop( Thread_t *pstThread_ )
 
     // Add this thread to the stop-list (removing it from active scheduling)
     // Remove the thread from scheduling
-    if (pstThread_->m_eState == THREAD_STATE_READY)
+    if (pstThread_->eState == THREAD_STATE_READY)
     {
         Scheduler_Remove(pstThread_);
     }
-    else if (pstThread_->m_eState == THREAD_STATE_BLOCKED)
+    else if (pstThread_->eState == THREAD_STATE_BLOCKED)
     {
-		ThreadList_Remove( pstThread_->m_pstCurrent, pstThread_ );        
+        ThreadList_Remove( pstThread_->pstCurrent, pstThread_ );
     }
 
-    pstThread_->m_pstOwner = Scheduler_GetStopList();
-    pstThread_->m_pstCurrent = pstThread_->m_pstOwner;
-	ThreadList_Add( pstThread_->m_pstOwner, pstThread_ );
+    pstThread_->pstOwner = Scheduler_GetStopList();
+    pstThread_->pstCurrent = pstThread_->pstOwner;
+    ThreadList_Add( pstThread_->pstOwner, pstThread_ );
     
-    pstThread_->m_eState = THREAD_STATE_STOP;
+    pstThread_->eState = THREAD_STATE_STOP;
 
 #if KERNEL_USE_TIMERS
     // Just to be safe - attempt to remove the thread's timer
     // from the timer-scheduler (does no harm if it isn't
     // in the timer-list)
-    TimerScheduler_Remove(&pstThread_->m_clTimer);
+    TimerScheduler_Remove(&pstThread_->stTimer);
 #endif
 
     CS_EXIT();
@@ -181,7 +181,7 @@ void Thread_Exit( Thread_t *pstThread_ )
 {
     K_BOOL bReschedule = 0;
     
-    KERNEL_TRACE_1( STR_THREAD_EXIT_1, pstThread_->m_ucThreadID );
+    KERNEL_TRACE_1( STR_THREAD_EXIT_1, pstThread_->ucThreadID );
     
     CS_ENTER();
     
@@ -193,32 +193,32 @@ void Thread_Exit( Thread_t *pstThread_ )
     }
     
     // Remove the thread from scheduling
-    if (pstThread_->m_eState == THREAD_STATE_READY)
+    if (pstThread_->eState == THREAD_STATE_READY)
     {
         Scheduler_Remove(pstThread_);
     }
-    else if (pstThread_->m_eState == THREAD_STATE_BLOCKED)
+    else if (pstThread_->eState == THREAD_STATE_BLOCKED)
     {
-		ThreadList_Remove( pstThread_->m_pstCurrent, pstThread_ );
+        ThreadList_Remove( pstThread_->pstCurrent, pstThread_ );
     }
 
-    pstThread_->m_pstCurrent = 0;
-    pstThread_->m_pstOwner = 0;
-    pstThread_->m_eState = THREAD_STATE_EXIT;
+    pstThread_->pstCurrent = 0;
+    pstThread_->pstOwner = 0;
+    pstThread_->eState = THREAD_STATE_EXIT;
 
     // We've removed the thread from scheduling, but interrupts might
     // trigger checks against this thread's currently priority before
     // we get around to scheduling new threads.  As a result, set the
     // priority to idle to ensure that we always wind up scheduling
     // new threads.
-    pstThread_->m_ucCurPriority = 0;
-    pstThread_->m_ucPriority = 0;
+    pstThread_->ucCurPriority = 0;
+    pstThread_->ucPriority = 0;
 
 #if KERNEL_USE_TIMERS
     // Just to be safe - attempt to remove the thread's timer
     // from the timer-scheduler (does no harm if it isn't
     // in the timer-list)
-    TimerScheduler_Remove(&pstThread_->m_clTimer);
+    TimerScheduler_Remove(&pstThread_->stTimer);
 #endif
 
     CS_EXIT();
@@ -244,45 +244,45 @@ static void ThreadSleepCallback( Thread_t *pstOwner_, void *pvData_ )
 //---------------------------------------------------------------------------
 void Thread_Sleep( K_ULONG ulTimeMs_)
 {    
-    Semaphore_t clSemaphore;
+    Semaphore_t stSemaphore;
     Timer_t *pstTimer = Thread_GetTimer( g_pstCurrent );
 
     // Create a Semaphore_t that this thread will block on
-	Semaphore_Init( &clSemaphore, 0, 1 );
+    Semaphore_Init( &stSemaphore, 0, 1 );
     
     // Create a one-shot timer that will call a callback that posts the 
     // Semaphore_t, waking our thread.
 	Timer_Init( pstTimer );
 	Timer_SetIntervalMSeconds( pstTimer, ulTimeMs_ );
 	Timer_SetCallback( pstTimer, ThreadSleepCallback );
-	Timer_SetData( pstTimer, (void*)&clSemaphore );
+    Timer_SetData( pstTimer, (void*)&stSemaphore );
 	Timer_SetFlags( pstTimer, TIMERLIST_FLAG_ONE_SHOT );
 	
     // Add the new timer to the timer scheduler, and block the thread
     TimerScheduler_Add(pstTimer);
-	Semaphore_Pend( &clSemaphore );    
+    Semaphore_Pend( &stSemaphore );
 }
 
 //---------------------------------------------------------------------------
 void Thread_USleep( K_ULONG ulTimeUs_)
 {    
-    Semaphore_t clSemaphore;
+    Semaphore_t stSemaphore;
     Timer_t *pstTimer = Thread_GetTimer( g_pstCurrent );
 
     // Create a Semaphore_t that this thread will block on
-    Semaphore_Init( &clSemaphore, 0, 1 );
+    Semaphore_Init( &stSemaphore, 0, 1 );
         
     // Create a one-shot timer that will call a callback that posts the
     // Semaphore_t, waking our thread.
     Timer_Init( pstTimer );
     Timer_SetIntervalUSeconds( pstTimer, ulTimeUs_ );
     Timer_SetCallback( pstTimer, ThreadSleepCallback );
-    Timer_SetData( pstTimer, (void*)&clSemaphore );
+    Timer_SetData( pstTimer, (void*)&stSemaphore );
     Timer_SetFlags( pstTimer, TIMERLIST_FLAG_ONE_SHOT );
         
     // Add the new timer to the timer scheduler, and block the thread
     TimerScheduler_Add(pstTimer);
-    Semaphore_Pend( &clSemaphore );
+    Semaphore_Pend( &stSemaphore );
 }
 #endif // KERNEL_USE_SLEEP
 
@@ -294,9 +294,9 @@ K_USHORT Thread_GetStackSlack( Thread_t *pstThread_ )
     CS_ENTER();
     
     //!! ToDo: Take into account stacks that grow up
-    for (usCount = 0; usCount < pstThread_->m_usStackSize; usCount++)
+    for (usCount = 0; usCount < pstThread_->usStackSize; usCount++)
     {
-        if (pstThread_->m_pwStack[usCount] != 0xFF)
+        if (pstThread_->pwStack[usCount] != 0xFF)
         {
             break;
         }
@@ -322,8 +322,8 @@ void Thread_Yield( void )
 #if KERNEL_USE_QUANTUM
             // new thread scheduled.  Stop current quantum timer (if it exists),
             // and restart it for the new thread (if required).
-            Quantum_RemoveThread();
-            Quantum_AddThread((Thread_t*)g_pstNext);
+            QuantuRemoveThread();
+            QuantuAddThread((Thread_t*)g_pstNext);
 #endif
             Thread_ContextSwitchSWI();
         }
@@ -341,7 +341,7 @@ void Thread_SetPriorityBase( Thread_t *pstThread_, K_UCHAR ucPriority_ )
 {
 	 ThreadList_Remove( Thread_GetCurrent( pstThread_ ), pstThread_ );
 	    
-	 Thread_SetCurrent( pstThread_, Scheduler_GetThreadList(pstThread_->m_ucPriority) );
+     Thread_SetCurrent( pstThread_, Scheduler_GetThreadList(pstThread_->ucPriority) );
     
      ThreadList_Add( Thread_GetCurrent( pstThread_ ), pstThread_ );
 }
@@ -361,8 +361,8 @@ void Thread_SetPriority( Thread_t *pstThread_, K_UCHAR ucPriority_ )
     Scheduler_Remove(pstThread_);
     CS_EXIT();
 
-    pstThread_->m_ucCurPriority = ucPriority_;
-    pstThread_->m_ucPriority = ucPriority_;
+    pstThread_->ucCurPriority = ucPriority_;
+    pstThread_->ucPriority = ucPriority_;
     
     CS_ENTER();    
     Scheduler_Add(pstThread_);
@@ -377,8 +377,8 @@ void Thread_SetPriority( Thread_t *pstThread_, K_UCHAR ucPriority_ )
     #if KERNEL_USE_QUANTUM
             // new thread scheduled.  Stop current quantum timer (if it exists),
             // and restart it for the new thread (if required).
-            Quantum_RemoveThread();
-            Quantum_AddThread((Thread_t*)g_pstNext);
+            QuantuRemoveThread();
+            QuantuAddThread((Thread_t*)g_pstNext);
     #endif
             CS_EXIT();
             Thread_ContextSwitchSWI();
@@ -394,7 +394,7 @@ void Thread_SetPriority( Thread_t *pstThread_, K_UCHAR ucPriority_ )
 void Thread_InheritPriority( Thread_t *pstThread_, K_UCHAR ucPriority_ )
 {    
     Thread_SetOwner(pstThread_, Scheduler_GetThreadList(ucPriority_));
-    pstThread_->m_ucCurPriority = ucPriority_;
+    pstThread_->ucCurPriority = ucPriority_;
 }
 
 //---------------------------------------------------------------------------
@@ -414,14 +414,14 @@ void Thread_InitIdle( Thread_t *pstThread_ )
 {
     LinkListNode_Clear( (LinkListNode_t*)pstThread_ );
 
-    pstThread_->m_ucPriority = 0;
-    pstThread_->m_ucCurPriority = 0;
-    pstThread_->m_pfEntryPoint = 0;
-    pstThread_->m_pvArg = 0;
-    pstThread_->m_ucThreadID = 255;
-    pstThread_->m_eState = THREAD_STATE_READY;
+    pstThread_->ucPriority = 0;
+    pstThread_->ucCurPriority = 0;
+    pstThread_->pfEntryPoint = 0;
+    pstThread_->pvArg = 0;
+    pstThread_->ucThreadID = 255;
+    pstThread_->eState = THREAD_STATE_READY;
 #if KERNEL_USE_THREADNAME
-    pstThread_->m_szName = "IDLE";
+    pstThread_->szName = "IDLE";
 #endif
 }
 #endif

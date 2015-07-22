@@ -61,7 +61,7 @@ typedef enum
 struct ATMegaUART_;
 
 //---------------------------------------------------------------------------
-typedef void (*UART_Rx_Callback_t)( struct ATMegaUART_ *pclUART );
+typedef void (*UART_Rx_Callback_t)( struct ATMegaUART_ *pstUART );
 
 //---------------------------------------------------------------------------
 /*!
@@ -70,25 +70,25 @@ typedef void (*UART_Rx_Callback_t)( struct ATMegaUART_ *pclUART );
 struct ATMegaUART_
 {
     //Inherit from Driver_t -- must be first.
-    Driver_t m_stDriver;
+    Driver_t stDriver;
 
-    K_UCHAR m_ucTxSize;                //!< Size of the TX Buffer
-    K_UCHAR m_ucTxHead;                //!< Head index
-    K_UCHAR m_ucTxTail;                //!< Tail index
+    K_UCHAR ucTxSize;                //!< Size of the TX Buffer
+    K_UCHAR ucTxHead;                //!< Head index
+    K_UCHAR ucTxTail;                //!< Tail index
 
-    K_UCHAR m_ucRxSize;                //!< Size of the RX Buffer
-    K_UCHAR m_ucRxHead;                //!< Head index
-    K_UCHAR m_ucRxTail;                //!< Tail index
+    K_UCHAR ucRxSize;                //!< Size of the RX Buffer
+    K_UCHAR ucRxHead;                //!< Head index
+    K_UCHAR ucRxTail;                //!< Tail index
 
-    K_UCHAR m_bRxOverflow;              //!< Receive buffer overflow
-    K_UCHAR m_bEcho;                    //!< Whether or not to echo RX characters to TX
+    K_UCHAR bRxOverflow;              //!< Receive buffer overflow
+    K_UCHAR bEcho;                    //!< Whether or not to echo RX characters to TX
 
-    K_UCHAR *m_pucRxBuffer;            //!< Receive buffer pointer
-    K_UCHAR *m_pucTxBuffer;            //!< Transmit buffer pointer
+    K_UCHAR *pucRxBuffer;            //!< Receive buffer pointer
+    K_UCHAR *pucTxBuffer;            //!< Transmit buffer pointer
 
-    K_ULONG m_ulBaudRate;              //!< Baud rate
+    K_ULONG ulBaudRate;              //!< Baud rate
 
-    K_UCHAR m_ucRxEscape;              //!< Escape character
+    K_UCHAR ucRxEscape;              //!< Escape character
 
     UART_Rx_Callback_t    pfCallback;    //!< Callback function on matched escape character
 };

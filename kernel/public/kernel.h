@@ -20,11 +20,11 @@ See license.txt for more information
     The Kernel namespace provides functions related to initializing and 
     starting up the kernel.
     
-    The Kernel::Init() function must be called before any of the other
+    The Kernel_Init() function must be called before any of the other
     functions in the kernel can be used.
     
     Once the initial kernel configuration has been completed (i.e. first 
-    threads have been added to the scheduler), the Kernel::Start() 
+    threads have been added to the scheduler), the Kernel_Start() 
     function can then be called, which will transition code execution from
     the "main()" context to the threads in the scheduler.    
 */

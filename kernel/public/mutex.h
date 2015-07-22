@@ -33,17 +33,17 @@ See license.txt for more information
     Initializing a Mutex_t object by calling:
 
     \code
-    clMutex.Init();
+    stMutex.Init();
     \endcode
 
     \section MUsage Resource protection example
 
     \code
-    clMutex.Claim();
+    stMutex.Claim();
     ...
     <resource protected block>
     ...
-    clMutex.Release();
+    stMutex.Release();
     \endcode
 
 */
@@ -72,12 +72,12 @@ See license.txt for more information
 typedef struct
 {
 	// Inherit from BlockingObject -- must go first.
-	ThreadList_t m_stList;
+    ThreadList_t stList;
 	
-	K_UCHAR m_ucRecurse;    //!< The recursive lock-count when a Mutex_t is claimed multiple times by the same owner
-	K_UCHAR m_bReady;       //!< State of the Mutex_t - true = ready, false = claimed
-	K_UCHAR m_ucMaxPri;     //!< Maximum priority of thread in queue, used for priority inheritence
-	Thread_t *m_pstOwner;     //!< Pointer to the thread that owns the Mutex_t (when claimed)
+    K_UCHAR ucRecurse;    //!< The recursive lock-count when a Mutex_t is claimed multiple times by the same owner
+    K_UCHAR bReady;       //!< State of the Mutex_t - true = ready, false = claimed
+    K_UCHAR ucMaxPri;     //!< Maximum priority of thread in queue, used for priority inheritence
+    Thread_t *pstOwner;     //!< Pointer to the thread that owns the Mutex_t (when claimed)
 } Mutex_t;
 
 //---------------------------------------------------------------------------

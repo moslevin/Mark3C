@@ -5,10 +5,10 @@ include $(ROOT_DIR)base.mak
 # If we're building a driver, set IS_DRV and DRVNAME
 # If we're building an app, set IS_APP and APPNAME
 IS_APP=1
-APPNAME=lab1_kernel_setup
+APPNAME=kernel_profile
 
 #this is the list of the objects required to build the kernel
-C_SOURCE=main.c
+C_SOURCE=mark3test.c
 
 LIBS=mark3c drvUART
 

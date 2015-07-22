@@ -39,8 +39,8 @@ See license.txt for more information
 	#include "timerlist.h"
 #endif
 
-static Message_t m_aclMessagePool[GLOBAL_MESSAGE_POOL_SIZE];
-static DoubleLinkList_t m_clList;
+static Message_t aclMessagePool[GLOBAL_MESSAGE_POOL_SIZE];
+static DoubleLinkList_t stList;
 
 #if KERNEL_USE_TIMEOUTS
 /*!
@@ -68,32 +68,32 @@ static Message_t *MessageQueue_Receive_i( MessageQueue_t *pstMsgQ_ );
 void Message_Init( Message_t* pstMsg_ ) 
 { 
 	LinkListNode_Clear( (LinkListNode_t*)pstMsg_ );
-	pstMsg_->m_pvData = NULL; 
-	pstMsg_->m_usCode = 0; 
+	pstMsg_->pvData = NULL; 
+	pstMsg_->usCode = 0; 
 }
     
 //---------------------------------------------------------------------------
 void Message_SetData( Message_t* pstMsg_, void *pvData_ ) 
 { 
-	pstMsg_->m_pvData = pvData_; 
+	pstMsg_->pvData = pvData_; 
 }
     
 //---------------------------------------------------------------------------
 void *Message_GetData( Message_t* pstMsg_ ) 
 { 
-	return pstMsg_->m_pvData; 
+	return pstMsg_->pvData; 
 }
 	
 //---------------------------------------------------------------------------
 void Message_SetCode(  Message_t* pstMsg_, K_USHORT usCode_ ) 
 { 
-	pstMsg_->m_usCode = usCode_; 
+	pstMsg_->usCode = usCode_; 
 }
 	
 //---------------------------------------------------------------------------
 K_USHORT Message_GetCode( Message_t* pstMsg_ ) 
 { 
-	return pstMsg_->m_usCode; 
+	return pstMsg_->usCode; 
 }
 
 //---------------------------------------------------------------------------
@@ -101,12 +101,12 @@ void GlobalMessagePool_Init( void )
 {
 	K_UCHAR i;
 
-	DoubleLinkList_Init( &m_clList );
+	DoubleLinkList_Init( &stList );
 	
     for (i = 0; i < GLOBAL_MESSAGE_POOL_SIZE; i++)
 	{
-		Message_Init( &m_aclMessagePool[i] );
-		DoubleLinkList_Add( &m_clList, (LinkListNode_t*)&m_aclMessagePool[i]);	
+		Message_Init( &aclMessagePool[i] );
+		DoubleLinkList_Add( &stList, (LinkListNode_t*)&aclMessagePool[i]);	
 	}
 }
 
@@ -117,7 +117,7 @@ void GlobalMessagePool_Push( Message_t *pstMessage_ )
 	
 	CS_ENTER();
 	
-	DoubleLinkList_Add( &m_clList, (LinkListNode_t*)pstMessage_ );
+	DoubleLinkList_Add( &stList, (LinkListNode_t*)pstMessage_ );
 
 	CS_EXIT();
 }
@@ -128,10 +128,10 @@ Message_t *GlobalMessagePool_Pop( void )
 	Message_t *pstRet;
 	CS_ENTER();
 	
-	pstRet = (Message_t*)( LinkList_GetHead( (LinkList_t*)&m_clList ) );
+	pstRet = (Message_t*)( LinkList_GetHead( (LinkList_t*)&stList ) );
     if (0 != pstRet)
     {
-		DoubleLinkList_Remove( &m_clList, (LinkListNode_t*)pstRet );
+		DoubleLinkList_Remove( &stList, (LinkListNode_t*)pstRet );
     }
 	
 	CS_EXIT();
@@ -141,8 +141,8 @@ Message_t *GlobalMessagePool_Pop( void )
 //---------------------------------------------------------------------------
 void MessageQueue_Init( MessageQueue_t *pstMsgQ_ ) 
 { 
-	Semaphore_Init( &(pstMsgQ_->m_clSemaphore), 0, GLOBAL_MESSAGE_POOL_SIZE);  
-	DoubleLinkList_Init( &(pstMsgQ_->m_clLinkList) );  
+	Semaphore_Init( &(pstMsgQ_->stSemaphore), 0, GLOBAL_MESSAGE_POOL_SIZE);  
+	DoubleLinkList_Init( &(pstMsgQ_->stLinkList) );  
 }
 
 //---------------------------------------------------------------------------
@@ -174,19 +174,19 @@ Message_t *MessageQueue_Receive_i(  MessageQueue_t *pstMsgQ_ )
 	
 	// Block the current thread on the counting Semaphore_t
 #if KERNEL_USE_TIMEOUTS
-	if ( 0 == Semaphore_TimedPend( &(pstMsgQ_->m_clSemaphore), ulTimeWaitMS_ ) )    
+	if ( 0 == Semaphore_TimedPend( &(pstMsgQ_->stSemaphore), ulTimeWaitMS_ ) )    
     {
         return NULL;
     }
 #else
-	Semaphore_Pend( &(pstMsgQ_->m_clSemaphore) );    
+	Semaphore_Pend( &(pstMsgQ_->stSemaphore) );    
 #endif
 	
 	CS_ENTER();
 	
 	// Pop the head of the message queue and return it
-	pstRet = (Message_t*)LinkList_GetHead( (LinkList_t*)&(pstMsgQ_->m_clLinkList) );
-	DoubleLinkList_Remove( (DoubleLinkList_t*)&(pstMsgQ_->m_clLinkList), (LinkListNode_t*)pstRet );
+	pstRet = (Message_t*)LinkList_GetHead( (LinkList_t*)&(pstMsgQ_->stLinkList) );
+	DoubleLinkList_Remove( (DoubleLinkList_t*)&(pstMsgQ_->stLinkList), (LinkListNode_t*)pstRet );
 	
 	CS_EXIT();
 	
@@ -201,10 +201,10 @@ void MessageQueue_Send( MessageQueue_t *pstMsgQ_, Message_t *pstSrc_ )
 	CS_ENTER();
 	
 	// Add the message to the head of the linked list
-	DoubleLinkList_Add( (DoubleLinkList_t*)&(pstMsgQ_->m_clLinkList), (LinkListNode_t*)pstSrc_ );
+	DoubleLinkList_Add( (DoubleLinkList_t*)&(pstMsgQ_->stLinkList), (LinkListNode_t*)pstSrc_ );
 		
 	// Post the Semaphore_t, waking the blocking thread for the queue.
-	Semaphore_Post( &(pstMsgQ_->m_clSemaphore) );
+	Semaphore_Post( &(pstMsgQ_->stSemaphore) );
 	
 	CS_EXIT();
 }
@@ -212,6 +212,6 @@ void MessageQueue_Send( MessageQueue_t *pstMsgQ_, Message_t *pstSrc_ )
 //---------------------------------------------------------------------------
 K_USHORT MessageQueue_GetCount( MessageQueue_t *pstMsgQ_ )
 {
-	return Semaphore_GetCount( &(pstMsgQ_->m_clSemaphore) );
+	return Semaphore_GetCount( &(pstMsgQ_->stSemaphore) );
 }
 #endif //KERNEL_USE_MESSAGE

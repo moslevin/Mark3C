@@ -40,14 +40,14 @@ static K_UCHAR Mutex_WakeNext( Mutex_t *pstMutex_ );
 
 #if KERNEL_USE_TIMEOUTS
 /*!
-    * \brief Claim_i
+    * \brief Claii
     *
     * Abstracts out timed/non-timed Mutex_t claim operations.
     *
     * \param ulWaitTimeMS_ Time in MS to wait, 0 for infinite
     * \return true on successful claim, false otherwise
     */
-static K_BOOL Mutex_Claim_i( Mutex_t *pstMutex_, K_ULONG ulWaitTimeMS_ );
+static K_BOOL Mutex_Claii( Mutex_t *pstMutex_, K_ULONG ulWaitTimeMS_ );
 
 /*!
     \fn void WakeMe( Thread_t *pstOwner_ )
@@ -65,12 +65,12 @@ static void Mutex_WakeMe( Mutex_t *pstMutex_, Thread_t *pstOwner_ );
 
 #else
 /*!
-    * \brief Claim_i
+    * \brief Claii
     *
     * Abstraction for Mutex_t claim operations.
     *
     */
-static void Mutex_Claim_i( Mutex_t *pstMutex_ );
+static void Mutex_Claii( Mutex_t *pstMutex_ );
 #endif
 
 #if KERNEL_USE_TIMEOUTS
@@ -124,7 +124,7 @@ K_UCHAR Mutex_WakeNext( Mutex_t *pstMutex_ )
     BlockingObject_UnBlock(pstChosenOne);
     
     // The chosen one now owns the Mutex_t
-    pstMutex_->m_pstOwner = pstChosenOne;
+    pstMutex_->pstOwner = pstChosenOne;
 
     // Signal a context switch if it's a greater than or equal to the current priority
     if ( Thread_GetCurPriority(pstChosenOne) >= 
@@ -141,23 +141,23 @@ void Mutex_Init( Mutex_t *pstMutex_ )
 	ThreadList_Init( (ThreadList_t*)pstMutex_ );
 	
     // Reset the data in the Mutex_t
-    pstMutex_->m_bReady = 1;             // The Mutex_t is free.
-    pstMutex_->m_ucMaxPri = 0;           // Set the maximum priority inheritence state
-    pstMutex_->m_pstOwner = NULL;        // Clear the Mutex_t owner
-    pstMutex_->m_ucRecurse = 0;          // Reset recurse count
+    pstMutex_->bReady = 1;             // The Mutex_t is free.
+    pstMutex_->ucMaxPri = 0;           // Set the maximum priority inheritence state
+    pstMutex_->pstOwner = NULL;        // Clear the Mutex_t owner
+    pstMutex_->ucRecurse = 0;          // Reset recurse count
 }
 
 //---------------------------------------------------------------------------
 #if KERNEL_USE_TIMEOUTS
-K_BOOL Mutex_Claim_i( Mutex_t *pstMutex_, K_ULONG ulWaitTimeMS_)
+K_BOOL Mutex_Claii( Mutex_t *pstMutex_, K_ULONG ulWaitTimeMS_)
 #else
-void Mutex_Claim_i( Mutex_t *pstMutex_ )
+void Mutex_Claii( Mutex_t *pstMutex_ )
 #endif
 {
     KERNEL_TRACE_1( STR_MUTEX_CLAIM_1, (K_USHORT)Thread_GetID( g_pstCurrent ) );
 
 #if KERNEL_USE_TIMEOUTS
-    Timer_t clTimer;
+    Timer_t stTimer;
     K_BOOL bUseTimer = false;
 #endif
 
@@ -167,13 +167,13 @@ void Mutex_Claim_i( Mutex_t *pstMutex_ )
     Scheduler_SetScheduler( false );
 
     // Check to see if the Mutex_t is claimed or not
-    if (pstMutex_->m_bReady != 0)
+    if (pstMutex_->bReady != 0)
     {
         // Mutex_t isn't claimed, claim it.
-        pstMutex_->m_bReady = 0;
-        pstMutex_->m_ucRecurse = 0;
-        pstMutex_->m_ucMaxPri = Thread_GetPriority( g_pstCurrent );
-        pstMutex_->m_pstOwner = g_pstCurrent;
+        pstMutex_->bReady = 0;
+        pstMutex_->ucRecurse = 0;
+        pstMutex_->ucMaxPri = Thread_GetPriority( g_pstCurrent );
+        pstMutex_->pstOwner = g_pstCurrent;
 
         Scheduler_SetScheduler( true );
 
@@ -186,11 +186,11 @@ void Mutex_Claim_i( Mutex_t *pstMutex_ )
 
     // If the Mutex_t is already claimed, check to see if this is the owner thread,
     // since we allow the Mutex_t to be claimed recursively.
-    if (g_pstCurrent == pstMutex_->m_pstOwner)
+    if (g_pstCurrent == pstMutex_->pstOwner)
     {
         // Ensure that we haven't exceeded the maximum recursive-lock count
-        KERNEL_ASSERT( (pstMutex_->m_ucRecurse < 255) );
-        pstMutex_->m_ucRecurse++;
+        KERNEL_ASSERT( (pstMutex_->ucRecurse < 255) );
+        pstMutex_->ucRecurse++;
 
         // Increment the lock count and bail
         Scheduler_SetScheduler( true );
@@ -208,8 +208,8 @@ void Mutex_Claim_i( Mutex_t *pstMutex_ )
     {
 		Thread_SetExpired( g_pstCurrent, false );
         
-		Timer_Init( &clTimer );
-		Timer_Start( &clTimer, false, ulWaitTimeMS_, (TimerCallback_t)TimedMutex_Calback, (void*)pstMutex_);
+        Timer_Init( &stTimer );
+        Timer_Start( &stTimer, false, ulWaitTimeMS_, (TimerCallback_t)TimedMutex_Calback, (void*)pstMutex_);
         bUseTimer = true;
     }
 #endif
@@ -218,21 +218,21 @@ void Mutex_Claim_i( Mutex_t *pstMutex_ )
     // Check if priority inheritence is necessary.  We do this in order
     // to ensure that we don't end up with priority inversions in case
     // multiple threads are waiting on the same resource.
-    if(pstMutex_->m_ucMaxPri <= Thread_GetPriority( g_pstCurrent ) )
+    if(pstMutex_->ucMaxPri <= Thread_GetPriority( g_pstCurrent ) )
     {
-        pstMutex_->m_ucMaxPri = Thread_GetPriority( g_pstCurrent );
+        pstMutex_->ucMaxPri = Thread_GetPriority( g_pstCurrent );
 
         Thread_t *pstTemp = (Thread_t*)(LinkList_GetHead( (LinkList_t*)pstMutex_ ));
         while(pstTemp)
         {
-			Thread_InheritPriority( pstTemp, pstMutex_->m_ucMaxPri );            
+            Thread_InheritPriority( pstTemp, pstMutex_->ucMaxPri );
 			if(pstTemp == (Thread_t*)(LinkList_GetTail( (LinkList_t*)pstMutex_ )) )
             {
                 break;
             }
             pstTemp = (Thread_t*)LinkListNode_GetNext( (LinkListNode_t*)pstTemp );
         }
-		Thread_InheritPriority( pstMutex_->m_pstOwner, pstMutex_->m_ucMaxPri );        
+        Thread_InheritPriority( pstMutex_->pstOwner, pstMutex_->ucMaxPri );
     }
 
     // Done with thread data -reenable the scheduler
@@ -244,7 +244,7 @@ void Mutex_Claim_i( Mutex_t *pstMutex_ )
 #if KERNEL_USE_TIMEOUTS
     if (bUseTimer)
     {
-		Timer_Stop( &clTimer );        
+        Timer_Stop( &stTimer );
         return ( Thread_GetExpired( g_pstCurrent ) == 0);
     }
     return true;
@@ -255,9 +255,9 @@ void Mutex_Claim_i( Mutex_t *pstMutex_ )
 void Mutex_Claim( Mutex_t *pstMutex_ )
 {
 #if KERNEL_USE_TIMEOUTS
-    Mutex_Claim_i( pstMutex_ , 0 );
+    Mutex_Claii( pstMutex_ , 0 );
 #else
-    Mutex_Claim_i( pstMutex_ );
+    Mutex_Claii( pstMutex_ );
 #endif
 }
 
@@ -265,7 +265,7 @@ void Mutex_Claim( Mutex_t *pstMutex_ )
 #if KERNEL_USE_TIMEOUTS
 K_BOOL Mutex_TimedClaim( Mutex_t *pstMutex_, K_ULONG ulWaitTimeMS_ )
 {
-    return Mutex_Claim_i( pstMutex_ , ulWaitTimeMS_ );        
+    return Mutex_Claii( pstMutex_ , ulWaitTimeMS_ );
 }
 #endif
 
@@ -280,13 +280,13 @@ void Mutex_Release( Mutex_t *pstMutex_ )
     Scheduler_SetScheduler( false );
 
     // This thread had better be the one that owns the Mutex_t currently...
-    KERNEL_ASSERT( (g_pstCurrent == pstMutex_->m_pstOwner) );
+    KERNEL_ASSERT( (g_pstCurrent == pstMutex_->pstOwner) );
 
     // If the owner had claimed the lock multiple times, decrease the lock
     // count and return immediately.
-    if (pstMutex_->m_ucRecurse)
+    if (pstMutex_->ucRecurse)
     {
-        pstMutex_->m_ucRecurse--;
+        pstMutex_->ucRecurse--;
         Scheduler_SetScheduler( true );
         return;
     }
@@ -303,9 +303,9 @@ void Mutex_Release( Mutex_t *pstMutex_ )
     if ( LinkList_GetHead( (LinkList_t*)pstMutex_ ) == NULL)
     {
         // Re-initialize the Mutex_t to its default values
-        pstMutex_->m_bReady = 1;
-        pstMutex_->m_ucMaxPri = 0;
-        pstMutex_->m_pstOwner = NULL;
+        pstMutex_->bReady = 1;
+        pstMutex_->ucMaxPri = 0;
+        pstMutex_->pstOwner = NULL;
     }
     else
     {

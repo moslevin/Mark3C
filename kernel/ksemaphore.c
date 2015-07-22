@@ -41,7 +41,7 @@ See license.txt for more information
         
     Wake the next thread waiting on the Semaphore_t.
 */
-static K_UCHAR Semaphore_WakeNext( Semaphore_t *pstSem_ );
+static K_UCHAR Semaphore_WakeNext( Semaphore_t *pstSe );
 
 #if KERNEL_USE_TIMEOUTS
 /*!
@@ -54,7 +54,7 @@ static K_UCHAR Semaphore_WakeNext( Semaphore_t *pstSem_ );
 	classes, we have to wrap this as a public method - do not
 	use this for any other purposes.
 */
-static void Semaphore_WakeMe( Semaphore_t *pstSem_, Thread_t *pstChosenOne_);
+static void Semaphore_WakeMe( Semaphore_t *pstSe, Thread_t *pstChosenOne_);
 /*!
     * \brief Pend_i
     *
@@ -63,7 +63,7 @@ static void Semaphore_WakeMe( Semaphore_t *pstSem_, Thread_t *pstChosenOne_);
     * \param ulWaitTimeMS_ Time in MS to wait
     * \return true on success, false on failure.
     */
-static K_BOOL Semaphore_Pend_i( Semaphore_t *pstSem_, K_ULONG ulWaitTimeMS_ );
+static K_BOOL Semaphore_Pend_i( Semaphore_t *pstSe, K_ULONG ulWaitTimeMS_ );
 #else
 /*!
     * \brief Pend_i
@@ -71,7 +71,7 @@ static K_BOOL Semaphore_Pend_i( Semaphore_t *pstSem_, K_ULONG ulWaitTimeMS_ );
     * Internal function used to abstract timed and untimed Semaphore_t pend operations.
     *
     */
-static void Semaphore_Pend_i( Semaphore_t *pstSem_ );
+static void Semaphore_Pend_i( Semaphore_t *pstSe );
 #endif
     
 //---------------------------------------------------------------------------
@@ -102,7 +102,7 @@ void TimedSemaphore_Callback( Thread_t *pstOwner_, void *pvData_)
 }
 
 //---------------------------------------------------------------------------
-void Semaphore_WakeMe( Semaphore_t *pstSem_, Thread_t *pstChosenOne_ )
+void Semaphore_WakeMe( Semaphore_t *pstSe, Thread_t *pstChosenOne_ )
 { 
     // Remove from the Semaphore_t waitlist and back to its ready list.
     BlockingObject_UnBlock( pstChosenOne_ );
@@ -111,11 +111,11 @@ void Semaphore_WakeMe( Semaphore_t *pstSem_, Thread_t *pstChosenOne_ )
 #endif // KERNEL_USE_TIMEOUTS
 
 //---------------------------------------------------------------------------
-K_UCHAR Semaphore_WakeNext( Semaphore_t *pstSem_ )
+K_UCHAR Semaphore_WakeNext( Semaphore_t *pstSe )
 {
     Thread_t *pstChosenOne;
     
-    pstChosenOne = ThreadList_HighestWaiter( (ThreadList_t*)pstSem_ );
+    pstChosenOne = ThreadList_HighestWaiter( (ThreadList_t*)pstSe );
     
     // Remove from the Semaphore_t waitlist and back to its ready list.
     BlockingObject_UnBlock( pstChosenOne );
@@ -130,19 +130,19 @@ K_UCHAR Semaphore_WakeNext( Semaphore_t *pstSem_ )
 }
 
 //---------------------------------------------------------------------------
-void Semaphore_Init( Semaphore_t *pstSem_, K_USHORT usInitVal_, K_USHORT usMaxVal_)
+void Semaphore_Init( Semaphore_t *pstSe, K_USHORT usInitVal_, K_USHORT usMaxVal_)
 {
     // Copy the paramters into the object - set the maximum value for this
     // Semaphore_t to implement either binary or counting semaphores, and set
     // the initial count.  Clear the wait list for this object.
-    pstSem_->m_usValue = usInitVal_;
-    pstSem_->m_usMaxValue = usMaxVal_;    
+    pstSe->usValue = usInitVal_;
+    pstSe->usMaxValue = usMaxVal_;    
 
-	ThreadList_Init( (ThreadList_t*)pstSem_ );
+	ThreadList_Init( (ThreadList_t*)pstSe );
 }
 
 //---------------------------------------------------------------------------
-K_BOOL Semaphore_Post( Semaphore_t *pstSem_ )
+K_BOOL Semaphore_Post( Semaphore_t *pstSe )
 {
 	KERNEL_TRACE_1( STR_SEMAPHORE_POST_1, (K_USHORT)Thread_GetID( g_pstCurrent ));
 	
@@ -155,13 +155,13 @@ K_BOOL Semaphore_Post( Semaphore_t *pstSem_ )
 
     // If nothing is waiting for the Semaphore_t
 	
-    if ( LinkList_GetHead( (LinkList_t*)pstSem_ ) == NULL)
+    if ( LinkList_GetHead( (LinkList_t*)pstSe ) == NULL)
     {
         // Check so see if we've reached the maximum value in the Semaphore_t
-        if (pstSem_->m_usValue < pstSem_->m_usMaxValue)
+        if (pstSe->usValue < pstSe->usMaxValue)
         {
             // Increment the count value
-            pstSem_->m_usValue++;
+            pstSe->usValue++;
         }
         else
         {
@@ -173,7 +173,7 @@ K_BOOL Semaphore_Post( Semaphore_t *pstSem_ )
     {
         // Otherwise, there are threads waiting for the Semaphore_t to be
         // posted, so wake the next one (highest priority goes first).
-        bThreadWake = Semaphore_WakeNext( pstSem_ );
+        bThreadWake = Semaphore_WakeNext( pstSe );
     }
 
     CS_EXIT();
@@ -196,7 +196,7 @@ K_BOOL Semaphore_Post( Semaphore_t *pstSem_ )
 
 //---------------------------------------------------------------------------
 #if KERNEL_USE_TIMEOUTS
-K_BOOL Semaphore_Pend_i( Semaphore_t *pstSem_, K_ULONG ulWaitTimeMS_ )
+K_BOOL Semaphore_Pend_i( Semaphore_t *pstSe, K_ULONG ulWaitTimeMS_ )
 #else
 void Semaphore_Pend_i( void )
 #endif
@@ -213,11 +213,11 @@ void Semaphore_Pend_i( void )
     CS_ENTER();
 
     // Check to see if we need to take any action based on the Semaphore_t count
-    if (pstSem_->m_usValue != 0)
+    if (pstSe->usValue != 0)
     {
         // The Semaphore_t count is non-zero, we can just decrement the count
         // and go along our merry way.
-        pstSem_->m_usValue--;
+        pstSe->usValue--;
     }
     else
     {
@@ -228,11 +228,11 @@ void Semaphore_Pend_i( void )
         {
             Thread_SetExpired( g_pstCurrent, false );
 			Timer_Init( &stSemTimer );
-            Timer_Start( &stSemTimer, false, ulWaitTimeMS_, TimedSemaphore_Callback, (void*)pstSem_ );
+            Timer_Start( &stSemTimer, false, ulWaitTimeMS_, TimedSemaphore_Callback, (void*)pstSe );
             bUseTimer = true;
         }
 #endif
-        BlockingObject_Block( (ThreadList_t*)pstSem_, g_pstCurrent );
+        BlockingObject_Block( (ThreadList_t*)pstSe, g_pstCurrent );
 
         // Switch Threads immediately
         Thread_Yield();
@@ -252,29 +252,29 @@ void Semaphore_Pend_i( void )
 
 //---------------------------------------------------------------------------
 // Redirect the untimed pend API to the timed pend, with a null timeout.
-void Semaphore_Pend( Semaphore_t *pstSem_ )
+void Semaphore_Pend( Semaphore_t *pstSe )
 {
 #if KERNEL_USE_TIMEOUTS
-    Semaphore_Pend_i( pstSem_, 0);
+    Semaphore_Pend_i( pstSe, 0);
 #else
-    Semaphore_Pend_i( pstSem_ );
+    Semaphore_Pend_i( pstSe );
 #endif
 }
 
 #if KERNEL_USE_TIMEOUTS
 //---------------------------------------------------------------------------	
-K_BOOL Semaphore_TimedPend( Semaphore_t *pstSem_, K_ULONG ulWaitTimeMS_ )
+K_BOOL Semaphore_TimedPend( Semaphore_t *pstSe, K_ULONG ulWaitTimeMS_ )
 {
-    return Semaphore_Pend_i( pstSem_, ulWaitTimeMS_ );
+    return Semaphore_Pend_i( pstSe, ulWaitTimeMS_ );
 }
 #endif
 
 //---------------------------------------------------------------------------
-K_USHORT Semaphore_GetCount( Semaphore_t *pstSem_ )
+K_USHORT Semaphore_GetCount( Semaphore_t *pstSe )
 {
 	K_USHORT usRet;
 	CS_ENTER();
-	usRet = pstSem_->m_usValue;
+	usRet = pstSe->usValue;
 	CS_EXIT();
 	return usRet;
 }

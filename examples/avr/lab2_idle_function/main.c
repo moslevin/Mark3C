@@ -26,7 +26,7 @@ flAVR AVR Simulator.
 
 Lessons covered in this example include:
 
-- Usage of the Kernel::SetIdleFunc() API
+- Usage of the Kernel_SetIdleFunc() API
 - Changing an idle thread into an idle function
 - You can save a thread and a stack by using an idle function instead of a
   dedicated idle thread.
@@ -45,13 +45,13 @@ a thread object and stack for Idle functionality.
 // defines a thread object, stack (in word-array form), and the entry-point
 // function used by the application thread.
 #define APP_STACK_SIZE      (320/sizeof(K_WORD))
-static Thread_t  clAppThread;
+static Thread_t  stAppThread;
 static K_WORD  awAppStack[APP_STACK_SIZE];
 static void    AppMain(void *unused_);
 
 //---------------------------------------------------------------------------
 // This block declares the special function called from with the special
-// Kernel-Idle context.  We use the Kernel::SetIdleFunc() API to ensure that
+// Kernel-Idle context.  We use the Kernel_SetIdleFunc() API to ensure that
 // this function is called to provide our idle context.
 static void    IdleMain(void);
 
@@ -66,8 +66,8 @@ int main(void)
     // level 0 is still reserved for idle functionality.  Application threads
     // should never be scheduled at priority level 0 when the idle function is
     // used instead of an idle thread.
-    Thread_Init( &clAppThread, awAppStack,  APP_STACK_SIZE,  1, AppMain,  0);
-    Thread_Start( &clAppThread );
+    Thread_Init( &stAppThread, awAppStack,  APP_STACK_SIZE,  1, AppMain,  0);
+    Thread_Start( &stAppThread );
 
     // This function is used to install our specified idle function to be called
     // whenever there are no ready threads in the system.  Note that if no
@@ -75,7 +75,7 @@ int main(void)
     // function is essentially a null operation.
     Kernel_SetIdleFunc(IdleMain);
 
-    Thread_Start( &clAppThread );
+    Thread_Start( &stAppThread );
 
     return 0;
 }

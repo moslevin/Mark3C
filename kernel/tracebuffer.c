@@ -25,34 +25,34 @@ See license.txt for more information
 #if KERNEL_USE_DEBUG && !KERNEL_AWARE_SIMULATION
 
 //---------------------------------------------------------------------------
-static WriteBuffer16_t m_clBuffer;		//!< Object used to implement the tracebuffer
-static volatile K_USHORT m_usIndex;		//!< Current print index
-static K_USHORT m_ausBuffer[ (TRACE_BUFFER_SIZE / sizeof( K_USHORT )) ];	//!< Data buffer
+static WriteBuffer16_t stBuffer;		//!< Object used to implement the tracebuffer
+static volatile K_USHORT usIndex;		//!< Current print index
+static K_USHORT ausBuffer[ (TRACE_BUFFER_SIZE / sizeof( K_USHORT )) ];	//!< Data buffer
 
 //---------------------------------------------------------------------------
 void TraceBuffer_Init()
 {
-    WriteBuffer16_SetBuffers( &m_clBuffer, m_ausBuffer, TRACE_BUFFER_SIZE/sizeof(K_USHORT));
-	m_usIndex = 0;
+    WriteBuffer16_SetBuffers( &stBuffer, ausBuffer, TRACE_BUFFER_SIZE/sizeof(K_USHORT));
+	usIndex = 0;
 }
 
 //---------------------------------------------------------------------------
 K_USHORT TraceBuffer_Increment()
 {
-	return m_usIndex++;	
+	return usIndex++;	
 }
 
 //---------------------------------------------------------------------------
 void TraceBuffer_Write( K_USHORT *pusData_, K_USHORT usSize_ )
 {
 	// Pipe the data directly to the circular buffer
-    WriteBuffer16_WriteData( &m_clBuffer, pusData_, usSize_ );
+    WriteBuffer16_WriteData( &stBuffer, pusData_, usSize_ );
 }
 
 //---------------------------------------------------------------------------
 void TraceBuffer_SetCallback( WriteBufferCallback pfCallback_ )
 {
-    WriteBuffer16_SetCallback( &m_clBuffer, pfCallback_ );
+    WriteBuffer16_SetCallback( &stBuffer, pfCallback_ );
 }
 
 #endif
