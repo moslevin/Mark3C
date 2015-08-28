@@ -39,7 +39,7 @@ See license.txt for more information
      module, as is Thread_t Sleep functionality.
 */
 #define KERNEL_USE_TIMERS                (1)
-
+#define KERNEL_USE_SLEEP				 (1)
 /*!
     If you've opted to use the kernel timers module, you have an option
     as to which timer implementation to use:  Tick-based or Tick-less.
@@ -59,7 +59,7 @@ See license.txt for more information
     particular timer variant desired.
 */
 #if KERNEL_USE_TIMERS
-    #define KERNEL_TIMERS_TICKLESS       (1)
+    #define KERNEL_TIMERS_TICKLESS       (0)
 #endif
 
 /*!
