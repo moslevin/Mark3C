@@ -72,7 +72,7 @@ static void QuantumCallback(Thread_t *pstThread_, void *pvData_)
 }
 
 //---------------------------------------------------------------------------
-void QuantuSetTimer(Thread_t *pstThread_)
+void Quantum_SetTimer(Thread_t *pstThread_)
 {
     Timer_SetIntervalMSeconds( &stQuantumTimer, Thread_GetQuantum( pstThread_ ) );
     Timer_SetFlags( &stQuantumTimer, TIMERLIST_FLAG_ONE_SHOT );
@@ -82,7 +82,7 @@ void QuantuSetTimer(Thread_t *pstThread_)
 }
 
 //---------------------------------------------------------------------------
-void QuantuAddThread( Thread_t *pstThread_ )
+void Quantum_AddThread( Thread_t *pstThread_ )
 {
     if (bActive
 #if KERNEL_USE_IDLE_FUNC
@@ -105,14 +105,14 @@ void QuantuAddThread( Thread_t *pstThread_ )
     if ( LinkList_GetHead( (LinkList_t*)pstOwner ) !=
            LinkList_GetTail( (LinkList_t*)pstOwner ) )
     {
-        QuantuSetTimer( pstThread_ );
+        Quantum_SetTimer( pstThread_ );
         TimerScheduler_Add( &stQuantumTimer );
 		bActive = 1;
     }    
 }
 
 //---------------------------------------------------------------------------
-void QuantuRemoveThread( void )
+void Quantum_RemoveThread( void )
 {
 	if (!bActive)
 	{
@@ -125,7 +125,7 @@ void QuantuRemoveThread( void )
 }
 
 //---------------------------------------------------------------------------
-void QuantuUpdateTimer( void )
+void Quantum_UpdateTimer( void )
 {
     // If we have to re-add the quantum timer (more than 2 threads at the 
     // high-priority level...)
@@ -138,13 +138,13 @@ void QuantuUpdateTimer( void )
     }    
 }
 //---------------------------------------------------------------------------
-void QuantuSetInTimer( void )
+void Quantum_SetInTimer( void )
 {
     bInTimer = true;
 }
 
 //---------------------------------------------------------------------------
-void QuantustearInTimer(void)
+void Quantum_ClearInTimer(void)
 {
     bInTimer = false;
 }

@@ -137,12 +137,6 @@ K_BOOL Scheduler_SetScheduler(K_BOOL bEnable_)
 }
 
 //---------------------------------------------------------------------------
-/*!
- * \brief Scheduler_QueueScheduler
- *
- * Tell the kernel to perform a scheduling operation as soon as the
- * scheduler is re-enabled.
- */
 void Scheduler_QueueScheduler()
 {
     bQueuedSchedule = true;
@@ -155,14 +149,6 @@ ThreadList_t *Scheduler_GetThreadList( K_UCHAR ucPriority_ )
 }
 
 //---------------------------------------------------------------------------
-/*!
-    \brief Scheduler_GetStopList
-
-    Return the pointer to the list of threads that are in the
-    scheduler's stopped state.
-
-    \return Pointer to the ThreadList_t containing the stopped threads
-*/
 ThreadList_t *Scheduler_GetStopList()
 {
     return &stStopList;

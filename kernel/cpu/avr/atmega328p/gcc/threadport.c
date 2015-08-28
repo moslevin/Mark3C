@@ -174,6 +174,6 @@ ISR(TIMER1_COMPA_vect)
     TimerScheduler_Process();
 #endif    
 #if KERNEL_USE_QUANTUM    
-    QuantuUpdateTimer();
+    Quantum_UpdateTimer();
 #endif
 }

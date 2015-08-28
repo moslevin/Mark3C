@@ -33,6 +33,7 @@ See license.txt for more information
 #include "tracebuffer.h"
 #include "kerneldebug.h"
 #include "kernelaware.h"
+#include "debugtokens.h"
 
 K_BOOL bIsStarted;
 K_BOOL bIsPanic;
@@ -133,6 +134,7 @@ K_BOOL Kernel_IsPanic( void )
 	return bIsPanic;   
 }
 	
+#if KERNEL_USE_IDLE_FUNC
 //---------------------------------------------------------------------------
 void Kernel_SetIdleFunc( idle_func_t pfIdle_ )  
 {   
@@ -153,4 +155,5 @@ Thread_t *Kernel_GetIdleThread( void )
 { 
 	return (Thread_t*)&stIdle; 
 }
+#endif
 

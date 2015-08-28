@@ -24,15 +24,19 @@ See license.txt for more information
 #include "mark3cfg.h"
 #include "kerneltypes.h"
 
+#include "ll.h"
+#include "kernel.h"
+#include "scheduler.h"
+
 #include "threadport.h"
-#include "kernelswi.h"
+#include "thread.h"
 #include "kerneltimer.h"
+#include "timer.h"
+#include "kernelswi.h"
 #include "kernelprofile.h"
 
-#include "kernel.h"
-#include "thread.h"
-#include "timerlist.h"
 
+#include "timerlist.h"
 #include "ksemaphore.h"
 #include "mutex.h"
 #include "eventflag.h"

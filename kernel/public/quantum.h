@@ -50,7 +50,7 @@ See license.txt for more information
     being re-loaded or started.  The timer is never stopped, but if may
     be ignored on expiry.
 */
-void QuantuUpdateTimer( void );
+void Quantum_UpdateTimer( void );
 
 //---------------------------------------------------------------------------
 /*!
@@ -59,7 +59,7 @@ void QuantuUpdateTimer( void );
     Add the thread to the quantum timer.  Only one thread can own the quantum,
     since only one thread can be running on a core at a time.
 */
-void QuantuAddThread( Thread_t *pstThread_ );
+void Quantum_AddThread( Thread_t *pstThread_ );
 
 //---------------------------------------------------------------------------
 /*!
@@ -67,7 +67,7 @@ void QuantuAddThread( Thread_t *pstThread_ );
 
     Remove the thread from the quantum timer.  This will cancel the timer.
 */
-void QuantuRemoveThread( void );
+void Quantum_RemoveThread( void );
 
 //---------------------------------------------------------------------------
 /*!
@@ -78,7 +78,7 @@ void QuantuRemoveThread( void );
  * updated in the middle of a callback cycle, potentially resulting in
  * the kernel timer becoming disabled.
  */
-void QuantuSetInTimer( void );
+void Quantum_SetInTimer( void );
 
 //---------------------------------------------------------------------------
 /*!
@@ -86,7 +86,7 @@ void QuantuSetInTimer( void );
  *
  * Clear the flag once the timer callback function has been completed.
  */
-void QuantustearInTimer( void );
+void Quantum_ClearInTimer( void );
 
 
 //---------------------------------------------------------------------------
@@ -101,7 +101,7 @@ void QuantustearInTimer( void );
 
     \param pstThread_ Pointer to the thread to set the Quantum timer on
 */
-void QuantuSetTimer( Thread_t *pstThread_ );
+void Quantum_SetTimer( Thread_t *pstThread_ );
 
 
 #ifdef __cplusplus

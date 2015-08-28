@@ -139,7 +139,7 @@ void TimerList_Process(void)
     Timer_t *pstPrev;
 
 #if KERNEL_USE_QUANTUM
-    QuantuSetInTimer();
+    Quantum_SetInTimer();
 #endif
 #if KERNEL_TIMERS_TICKLESS
     // Clear the timer and its expiry time - keep it running though
@@ -271,7 +271,7 @@ void TimerList_Process(void)
 #endif
 
 #if KERNEL_USE_QUANTUM
-    QuantustearInTimer();
+    Quantum_ClearInTimer();
 #endif
 }
 

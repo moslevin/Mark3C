@@ -125,12 +125,11 @@ void Kernel_IdleFunc( void );
     */
 Thread_t *Kernel_GetIdleThread( void );
 
+#endif
+
 #ifdef __cplusplus
     }
 #endif
-
-#endif
-
 
 #endif
 

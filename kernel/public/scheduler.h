@@ -162,6 +162,26 @@ ThreadList_t *Scheduler_GetThreadList( K_UCHAR ucPriority_ );
 */
 #define Scheduler_IsEnabled() ( bEnabled )
 
+//---------------------------------------------------------------------------
+/*!
+ * \brief Scheduler_QueueScheduler
+ *
+ * Tell the kernel to perform a scheduling operation as soon as the
+ * scheduler is re-enabled.
+ */
+void Scheduler_QueueScheduler();
+
+//---------------------------------------------------------------------------
+/*!
+    \brief Scheduler_GetStopList
+
+    Return the pointer to the list of threads that are in the
+    scheduler's stopped state.
+
+    \return Pointer to the ThreadList_t containing the stopped threads
+*/
+ThreadList_t *Scheduler_GetStopList();
+
 #ifdef __cplusplus
     }
 #endif

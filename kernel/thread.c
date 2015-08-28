@@ -114,8 +114,8 @@ void Thread_Start( Thread_t *pstThread_ )
 		 Thread_GetCurPriority( Scheduler_GetCurrentThread() ) )
     {
         // Deal with the thread Quantum
-        QuantuRemoveThread();
-        QuantuAddThread(pstThread_);
+        Quantum_RemoveThread();
+        Quantum_AddThread(pstThread_);
     }
 #endif
 
@@ -322,8 +322,8 @@ void Thread_Yield( void )
 #if KERNEL_USE_QUANTUM
             // new thread scheduled.  Stop current quantum timer (if it exists),
             // and restart it for the new thread (if required).
-            QuantuRemoveThread();
-            QuantuAddThread((Thread_t*)g_pstNext);
+            Quantum_RemoveThread();
+            Quantum_AddThread((Thread_t*)g_pstNext);
 #endif
             Thread_ContextSwitchSWI();
         }
@@ -377,8 +377,8 @@ void Thread_SetPriority( Thread_t *pstThread_, K_UCHAR ucPriority_ )
     #if KERNEL_USE_QUANTUM
             // new thread scheduled.  Stop current quantum timer (if it exists),
             // and restart it for the new thread (if required).
-            QuantuRemoveThread();
-            QuantuAddThread((Thread_t*)g_pstNext);
+            Quantum_RemoveThread();
+            Quantum_AddThread((Thread_t*)g_pstNext);
     #endif
             CS_EXIT();
             Thread_ContextSwitchSWI();
