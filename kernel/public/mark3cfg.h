@@ -144,6 +144,9 @@ See license.txt for more information
     #define GLOBAL_MESSAGE_POOL_SIZE     (8)
 #endif
 
+#define KERNEL_USE_MAILBOX               (1)
+#define KERNEL_USE_NOTIFY                (1)
+
 /*!
     Do you want to be able to set threads to sleep for a specified time?
     This enables the Thread_t_Sleep() API.

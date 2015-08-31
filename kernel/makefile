@@ -14,8 +14,10 @@ C_SOURCE= \
 	driver.c \
     eventflag.c \
 	ll.c \
+	mailbox.c \
 	message.c \
 	mutex.c \
+	notify.c \
 	profile.c \
 	quantum.c \
 	scheduler.c \
